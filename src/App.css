@@ -1,0 +1,30 @@
+@reference "./index.css";
+
+.app-wrapper {
+  @apply min-h-screen flex flex-col bg-bg-main;
+}
+
+/* Custom scrollbar for premium feel */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-bg-main;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-brand-primary/20 rounded-full border-4 border-bg-main hover:bg-brand-primary/30 transition-colors;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #ffffff inset !important;
+  -webkit-text-fill-color: #374151 !important;
+}
+
+.active {
+  @apply !border-brand-primary !text-brand-primary !bg-brand-primary/5;
+}
