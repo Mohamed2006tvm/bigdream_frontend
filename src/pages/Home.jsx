@@ -39,16 +39,6 @@ const Screen3_4 = "/assests/Screens/Screen3.4.jpeg";
 const Home = () => {
   const [activeFaq, setActiveFaq] = useState(null);
 
-  const highlights = [
-    { id: 1, img: Screen1_1 },
-    { id: 2, img: Screen2_1 },
-    { id: 3, img: Screen3_1 },
-    { id: 4, img: Screen1_2 },
-    { id: 5, img: Screen2_2 },
-    { id: 6, img: Screen3_2 },
-    { id: 7, img: Screen1_3 },
-    { id: 8, img: Screen2_3 },
-  ];
 
   return (
     <div className="min-h-screen bg-bg-main font-sans">
@@ -352,27 +342,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Event Highlights (Gallery) */}
-      <section className="py-32 bg-slate-50/50">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-20">
-            <h2 className="text-5xl font-normal text-slate-900 tracking-tight">Event <span className="text-gradient-premium">Highlights</span></h2>
-            <p className="text-slate-500 mt-6 text-lg font-medium">Take a look at our premium event spaces</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {highlights.map((h) => (
-              <div key={h.id} className="group relative overflow-hidden rounded-[32px] shadow-2xl transition-all cursor-pointer aspect-[16/10] bg-white border-4 border-white">
-                <img src={h.img} alt={`Highlight ${h.id}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                <div className="absolute inset-0 bg-gradient-to-t from-pink-900/80 via-pink-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end p-8">
-                  <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                    <span className="text-white font-black uppercase tracking-widest text-xs border-b-2 border-brand-primary pb-1">View Details</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Ready to Book CTA */}
       <section className="py-32 container mx-auto px-6">
