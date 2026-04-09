@@ -99,7 +99,7 @@ const Availability = () => {
         email: bookingForm.email,
         phone: bookingForm.phone
       });
-      setBookingStatus({ type: 'success', message: 'Booking confirmed! Check your email & WhatsApp.' });
+      setBookingStatus({ type: 'success', message: 'Booking confirmed! Check your email.' });
       setTimeout(() => {
         fetchAvailability();
         closeModal();
