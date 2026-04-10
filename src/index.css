@@ -2,7 +2,7 @@
 
 @theme {
   --font-sans: "Outfit", system-ui, -apple-system, sans-serif;
-  --font-display: "Great Vibes", cursive;
+  --font-display: "Playfair Display", serif;
 
   --color-brand-primary: #ec4899;
   --color-brand-secondary: #8b5cf6;
@@ -33,10 +33,12 @@
 
 .animate-float-balloon {
   animation: float-balloon 6s ease-in-out infinite;
+  will-change: transform;
 }
 
 .animate-sparkle {
   animation: sparkle 2s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 
 .skeleton-shimmer {
@@ -82,7 +84,8 @@
   }
 
   .glass-card-premium {
-    @apply bg-white/70 backdrop-blur-xl border border-pink-100 rounded-3xl shadow-xl shadow-pink-900/5;
+    @apply bg-white/85 backdrop-blur-lg border border-pink-100 rounded-3xl shadow-xl shadow-pink-900/5;
+    will-change: transform, opacity;
   }
 
   .text-gradient-premium {

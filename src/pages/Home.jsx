@@ -50,12 +50,14 @@ const Home = () => {
         <motion.div 
           animate={{ y: [0, -30, 0], x: [0, 20, 0], scale: [1, 1.05, 1], rotate: [0, 10, 0] }} 
           transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-[10%] left-[10%] w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-pink-400/20 rounded-full mix-blend-multiply filter blur-[80px] md:blur-[120px] opacity-70 pointer-events-none -z-10" 
+          style={{ willChange: "transform, opacity" }}
+          className="absolute top-[10%] left-[10%] w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-pink-400/10 rounded-full filter blur-[60px] md:blur-[90px] opacity-70 pointer-events-none -z-10" 
         />
         <motion.div 
           animate={{ y: [0, 40, 0], x: [0, -30, 0], scale: [1, 1.1, 1], rotate: [0, -10, 0] }} 
           transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-          className="absolute top-[20%] right-[10%] w-[400px] md:w-[600px] h-[400px] md:h-[600px] bg-purple-400/15 rounded-full mix-blend-multiply filter blur-[100px] md:blur-[140px] opacity-70 pointer-events-none -z-10" 
+          style={{ willChange: "transform, opacity" }}
+          className="absolute top-[20%] right-[10%] w-[400px] md:w-[600px] h-[400px] md:h-[600px] bg-purple-400/10 rounded-full filter blur-[80px] md:blur-[110px] opacity-70 pointer-events-none -z-10" 
         />
 
         {/* Floating Balloons */}
