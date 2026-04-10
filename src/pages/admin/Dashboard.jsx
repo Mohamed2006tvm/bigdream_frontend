@@ -6,7 +6,7 @@ import {
   Trash2, Filter, Loader2, LogOut, ChevronLeft, ChevronRight,
   Hammer, RotateCcw, X, AlertCircle, Plus, CheckCircle2, Mail
 } from 'lucide-react';
-import { format, addDays } from 'date-fns';
+import { format, addDays, isSameDay } from 'date-fns';
 import { formatTimeSlot } from '../../utils/formatters';
 import gsap from 'gsap';
 
@@ -62,17 +62,13 @@ const Dashboard = () => {
   const fetchMessages = async () => {
     setLoading(true);
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-      const targetUrl = apiUrl.endsWith('/api') ? `${apiUrl}/admin/messages` : `${apiUrl}/api/admin/messages`;
-      
-      const response = await fetch(`${targetUrl}?page=${messagePage}`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      });
-      const data = await response.json();
+      const { data } = await adminService.getMessages(messagePage);
       if (data.success) {
         setMessages(data.data.messages);
         setMessageTotal(data.data.total);
       }
+    } catch (err) {
+      console.error('Failed to fetch messages', err);
     } finally {
       setLoading(false);
     }
@@ -80,29 +76,21 @@ const Dashboard = () => {
 
   const markMessageAsRead = async (id) => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-      const targetUrl = apiUrl.endsWith('/api') ? `${apiUrl}/admin/messages/${id}/read` : `${apiUrl}/api/admin/messages/${id}/read`;
-
-      await fetch(targetUrl, {
-        method: 'PATCH',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      });
+      await adminService.updateBooking ? null : null; // keep import used
+      // Use the API service directly
+      const api = (await import('../../services/api')).default;
+      await api.patch(`/admin/messages/${id}/read`);
       fetchMessages();
-    } catch (err) { console.error(err); }
+    } catch (err) { console.error('Failed to mark message as read', err); }
   };
 
   const deleteMessage = async (id) => {
     if (!window.confirm('Delete this message?')) return;
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-      const targetUrl = apiUrl.endsWith('/api') ? `${apiUrl}/admin/messages/${id}` : `${apiUrl}/api/admin/messages/${id}`;
-
-      await fetch(targetUrl, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      });
+      const api = (await import('../../services/api')).default;
+      await api.delete(`/admin/messages/${id}`);
       fetchMessages();
-    } catch (err) { console.error(err); }
+    } catch (err) { console.error('Failed to delete message', err); }
   };
 
   useEffect(() => {
@@ -124,11 +112,13 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchBookings();
-    }, 400);
-    return () => clearTimeout(timer);
-  }, [page, search]);
+    if (view === 'bookings') {
+      const timer = setTimeout(() => {
+        fetchBookings();
+      }, search ? 400 : 0);
+      return () => clearTimeout(timer);
+    }
+  }, [page, search, view]);
 
   useEffect(() => {
     if (isManualModalOpen && manualBooking.date) {
@@ -203,10 +193,16 @@ const Dashboard = () => {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('admin');
-    window.location.href = '/';
+  const handleLogout = async () => {
+    try {
+      await adminService.logout(); // clears HttpOnly cookie on server
+    } catch {
+      // ignore — still clear local state
+    } finally {
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('admin');
+      window.location.href = '/';
+    }
   };
 
   useEffect(() => {
@@ -237,54 +233,110 @@ const Dashboard = () => {
     gsap.to(overlayRef.current, { opacity: 0, duration: 0.2 });
   };
 
+  const StatsSkeleton = () => (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="glass-card-premium p-8 flex items-center gap-6">
+          <div className="p-4 rounded-2xl bg-slate-100 skeleton-shimmer w-14 h-14"></div>
+          <div className="space-y-2 flex-1">
+            <div className="h-3 w-16 bg-slate-100 skeleton-shimmer rounded"></div>
+            <div className="h-8 w-24 bg-slate-100 skeleton-shimmer rounded-lg"></div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  const MobileCardSkeleton = () => (
+    <div className="p-4 space-y-4">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="p-6 rounded-2xl bg-white border border-pink-100/50 space-y-4">
+          <div className="flex justify-between">
+            <div className="h-6 w-20 bg-slate-50 skeleton-shimmer rounded-lg"></div>
+            <div className="h-6 w-24 bg-slate-50 skeleton-shimmer rounded-lg"></div>
+          </div>
+          <div className="space-y-2">
+            <div className="h-4 w-1/2 bg-slate-50 skeleton-shimmer rounded"></div>
+            <div className="h-3 w-1/3 bg-slate-50 skeleton-shimmer rounded"></div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  const TableSkeleton = ({ cols }) => (
+    <tbody className="divide-y divide-white/5">
+      {[1, 2, 3, 4, 5].map((i) => (
+        <tr key={i}>
+          {Array.from({ length: cols }).map((_, j) => (
+            <td key={j} className="px-8 py-8">
+              <div className="h-4 bg-slate-50 skeleton-shimmer rounded w-full"></div>
+            </td>
+          ))}
+        </tr>
+      ))}
+    </tbody>
+  );
+
   return (
     <div className="min-h-screen bg-bg-main pb-24">
       <Navbar />
       <div className="container mx-auto px-6 py-12">
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12 animate-fade-in">
+        <header className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-8 mb-12 animate-fade-in">
           <div>
-            <h2 className="text-4xl mb-2 text-slate-900">Admin <span className="text-gradient-premium">Dashboard</span></h2>
-            <p className="text-slate-500 font-medium">Welcome back, <span className="text-brand-primary font-bold">{JSON.parse(localStorage.getItem('admin'))?.username || 'Admin'}</span></p>
+            <h2 className="text-3xl md:text-4xl mb-2 text-slate-900">Admin <span className="text-gradient-premium">Dashboard</span></h2>
+            <p className="text-slate-500 font-medium text-sm md:text-base">Welcome back, <span className="text-brand-primary font-bold">{JSON.parse(sessionStorage.getItem('admin'))?.username || 'Admin'}</span></p>
           </div>
-          <div className="flex flex-wrap gap-4">
-            <button onClick={() => setView(view === 'bookings' ? 'messages' : 'bookings')} className="btn-outline-premium group">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:flex xl:flex-wrap gap-3 md:gap-4 w-full xl:w-auto">
+            <button 
+              onClick={() => {
+                setLoading(true);
+                setView(view === 'bookings' ? 'messages' : 'bookings');
+              }} 
+              className="btn-outline-premium group w-full xl:w-auto justify-start md:justify-center px-4 md:px-6"
+            >
               {view === 'bookings' ? <Mail className="text-brand-primary" size={18} /> : <CalendarDays className="text-brand-primary" size={18} />}
-              {view === 'bookings' ? 'View Messages' : 'View Bookings'}
+              <span className="text-sm font-bold">{view === 'bookings' ? 'View Messages' : 'View Bookings'}</span>
             </button>
             <button onClick={() => {
               setIsAvailabilityOpen(true);
               setIsSettingsOpen(false);
               setIsManualModalOpen(false);
               setSelectedMessage(null);
-            }} className="btn-outline-premium group">
-              <CalendarDays className="text-brand-primary" size={18} /> Booking Window
+            }} className="btn-outline-premium group w-full xl:w-auto justify-start md:justify-center px-4 md:px-6">
+              <CalendarDays className="text-brand-primary" size={18} /> 
+              <span className="text-sm font-bold">Booking Window</span>
             </button>
             <button onClick={() => {
               setIsSettingsOpen(true);
               setIsAvailabilityOpen(false);
               setIsManualModalOpen(false);
               setSelectedMessage(null);
-            }} className="btn-outline-premium group">
-              <Clock className="text-brand-primary group-hover:rotate-12 transition-transform" size={18} /> Shift Settings
+            }} className="btn-outline-premium group w-full xl:w-auto justify-start md:justify-center px-4 md:px-6">
+              <Clock className="text-brand-primary group-hover:rotate-12 transition-transform" size={18} /> 
+              <span className="text-sm font-bold">Shift Settings</span>
             </button>
             <button onClick={() => {
               setIsManualModalOpen(true);
               setIsAvailabilityOpen(false);
               setIsSettingsOpen(false);
               setSelectedMessage(null);
-            }} className="btn-premium group">
-              <Plus className="group-hover:rotate-90 transition-transform" size={18} /> Manual Booking
+            }} className="btn-premium group w-full xl:w-auto justify-start md:justify-center px-4 md:px-6">
+              <Plus className="group-hover:rotate-90 transition-transform" size={18} /> 
+              <span className="text-sm font-bold text-white">Manual Booking</span>
             </button>
-            <button onClick={handleLogout} className="btn-outline-premium border-red-100 text-red-500 hover:bg-red-50">
-              <LogOut size={18} /> Logout
+            <button onClick={handleLogout} className="btn-outline-premium border-red-100 text-red-500 hover:bg-red-50 w-full xl:w-auto justify-start md:justify-center px-4 md:px-6">
+              <LogOut size={18} /> 
+              <span className="text-sm font-bold">Logout</span>
             </button>
           </div>
         </header>
 
         <div ref={contentRef}>
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 opacity-0">
-            {[
+          {loading && screens.length === 0 ? <StatsSkeleton /> : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 opacity-0">
+              {[
               { 
                 label: view === 'bookings' ? 'Total Bookings' : 'Total Messages', 
                 value: view === 'bookings' ? total : messageTotal, 
@@ -292,12 +344,12 @@ const Dashboard = () => {
               },
               { 
                 label: view === 'bookings' ? 'Today Reservations' : 'Unread Inquiries', 
-                value: view === 'bookings' ? bookings.filter(b => b.date.startsWith(format(new Date(), 'yyyy-MM-dd'))).length : messages.filter(m => !m.is_read).length, 
+                value: view === 'bookings' ? bookings.filter(b => isSameDay(new Date(b.date), new Date())).length : messages.filter(m => !m.is_read).length, 
                 icon: <Clock size={24} className={view === 'bookings' ? "text-emerald-400" : "text-amber-400"} /> 
               },
-              { label: 'Active Screens', value: screens.length || 3, icon: <BarChart3 size={24} className="text-brand-accent" /> }
+              { label: 'Active Screens', value: screens.filter(s => s.is_active !== false).length, icon: <BarChart3 size={24} className="text-brand-accent" /> }
             ].map((stat, i) => (
-              <div key={i} className="glass-card-premium p-8 flex items-center gap-6 group hover:translate-y-[-4px] transition-transform">
+              <div key={i} className="glass-card-premium p-8 flex items-center gap-6 group hover:translate-y-[-4px] transition-transform shadow-sm hover:shadow-md">
                 <div className="p-4 rounded-2xl bg-brand-primary/5 border border-pink-100/50 group-hover:bg-brand-primary/10 transition-colors">
                   {stat.icon}
                 </div>
@@ -308,6 +360,7 @@ const Dashboard = () => {
               </div>
             ))}
           </div>
+        )}
 
           {view === 'bookings' ? (
           /* Booking Table */
@@ -335,7 +388,8 @@ const Dashboard = () => {
             </div>
             
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+              {/* Desktop Table */}
+              <table className="hidden md:table w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50/50">
                     <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-slate-400 border-b border-pink-100/50">Screen</th>
@@ -345,89 +399,140 @@ const Dashboard = () => {
                     <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-slate-400 border-b border-pink-100/50 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
-                  {loading ? (
-                    <tr><td colSpan="5" className="py-24 text-center"><Loader2 className="animate-spin inline-block text-brand-primary" size={40} /></td></tr>
-                  ) : bookings.length === 0 ? (
+                {loading ? <TableSkeleton cols={5} /> : bookings.length === 0 ? (
+                  <tbody className="divide-y divide-white/5">
                     <tr><td colSpan="5" className="py-24 text-center text-slate-500 font-medium">No bookings found in vault.</td></tr>
-                  ) : (
-                    bookings.map((b) => (
-                      <tr key={b.id} className="hover:bg-pink-50/20 transition-colors group">
-                        <td className="px-8 py-6">
-                           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-brand-primary/5 text-brand-primary border border-pink-100 text-sm font-bold">
-                             Screen {b.screen_name}
-                           </div>
-                        </td>
-                        <td className="px-8 py-6">
-                          <div className="text-slate-800 font-bold font-sans">{format(new Date(b.date), 'dd MMM yyyy')}</div>
-                          <div className="text-brand-accent text-xs font-bold uppercase tracking-wide flex items-center gap-1 mt-1">
-                            <Clock size={12} /> {formatTimeSlot(b.time_slot)}
-                          </div>
-                        </td>
-                        <td className="px-8 py-6">
-                          <div className="text-slate-800 font-bold">{b.customer_name}</div>
-                          <div className="text-slate-400 text-xs font-bold font-mono mt-1">{b.phone}</div>
-                        </td>
-                        <td className="px-8 py-6">
-                        <span className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase ${
-                          b.is_completed ? 'bg-slate-100 text-slate-500 border border-slate-200' :
-                          (b.status === 'booked' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 
-                          (b.status === 'cancelled' ? 'bg-red-50 text-red-600 border border-red-100' : 
-                          'bg-amber-50 text-amber-600 border border-amber-100'))
-                        }`}>
-                          {b.is_completed ? 'completed' : b.status}
-                        </span>
-                        </td>
-                        <td className="px-8 py-6 text-right">
-                          <div className="flex gap-2 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button
-                              onClick={() => {
-                                setEditingBooking(b);
-                                setCustomSlot(b.time_slot);
-                                setIsCustom(!slots.includes(b.time_slot));
-                                setIsAvailabilityOpen(false);
-                                setIsSettingsOpen(false);
-                                setIsManualModalOpen(false);
-                                setSelectedMessage(null);
-                              }}
-                              className="p-2 rounded-lg bg-white border border-pink-100 shadow-sm hover:bg-brand-primary/5 hover:border-brand-primary/30 text-slate-400 hover:text-brand-primary transition-all"
-                              title="Edit"
-                            >
-                              <Edit2 size={16} />
-                            </button>
-                            {b.status === 'booked' ? (
-                              <button
-                                onClick={() => handleUpdateStatus(b.id, 'cancelled')}
-                                disabled={actionLoading === b.id}
-                                className="p-2 rounded-lg bg-white border border-pink-100 shadow-sm hover:bg-red-50 hover:border-red-200 text-slate-400 hover:text-red-500 transition-all"
-                                title="Cancel"
-                              >
-                                {actionLoading === b.id ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
-                              </button>
-                            ) : (
-                              <button
-                                onClick={() => handleUpdateStatus(b.id, 'booked')}
-                                disabled={actionLoading === b.id}
-                                className="p-2 rounded-lg bg-white/5 border border-white/5 hover:bg-emerald-500/20 hover:border-emerald-500/30 text-slate-400 hover:text-emerald-400 transition-all"
-                                title="Restore"
-                              >
-                                <RotateCcw size={16} />
-                              </button>
-                            )}
-                            <button
-                              onClick={() => handleUpdateStatus(b.id, 'maintenance')}
-                              className="p-2 rounded-lg bg-white border border-pink-100 shadow-sm hover:bg-amber-50 hover:border-amber-200 text-slate-400 hover:text-amber-500 transition-all"
-                              title="Maintenance"
-                            >
-                              <Hammer size={16} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
+                  </tbody>
+                ) : (
+                  <tbody className="divide-y divide-white/5">
+                    {bookings.map((b) => {
+                        const today = new Date();
+                        const bookingDate = new Date(b.date);
+                        const isToday = isSameDay(bookingDate, today);
+                        const isPastDay = bookingDate < new Date(today.setHours(0,0,0,0));
+                        const endTime = b.time_slot.split('-')[1];
+                        const currentTime = format(new Date(), 'HH:mm');
+                        const isFinishedToday = isToday && endTime < currentTime;
+                        const isCompleted = isPastDay || isFinishedToday;
+
+                        return (
+                          <tr key={b.id} className="hover:bg-pink-50/20 transition-colors group">
+                            <td className="px-8 py-6">
+                              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-brand-primary/5 text-brand-primary border border-pink-100 text-sm font-bold">
+                                Screen {b.screen_name}
+                              </div>
+                            </td>
+                            <td className="px-8 py-6">
+                              <div className="text-slate-800 font-bold font-sans">{format(new Date(b.date), 'dd MMM yyyy')}</div>
+                              <div className="text-brand-accent text-xs font-bold uppercase tracking-wide flex items-center gap-1 mt-1">
+                                <Clock size={12} /> {formatTimeSlot(b.time_slot)}
+                              </div>
+                            </td>
+                            <td className="px-8 py-6">
+                              <div className="text-slate-800 font-bold">{b.customer_name}</div>
+                              <div className="text-slate-400 text-xs font-bold font-mono mt-1">{b.phone}</div>
+                            </td>
+                            <td className="px-8 py-6">
+                              <span className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase ${
+                                isCompleted ? 'bg-slate-100 text-slate-500 border border-slate-200' :
+                                (b.status === 'booked' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 
+                                (b.status === 'cancelled' ? 'bg-red-50 text-red-600 border border-red-100' : 
+                                'bg-amber-50 text-amber-600 border border-amber-100'))
+                              }`}>
+                                {isCompleted ? 'completed' : b.status}
+                              </span>
+                            </td>
+                            <td className="px-8 py-6 text-right">
+                              <div className="flex gap-2 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                                {!isCompleted && (
+                                  <button
+                                    onClick={() => {
+                                      setEditingBooking(b);
+                                      setCustomSlot(b.time_slot);
+                                      setIsCustom(!slots.includes(b.time_slot));
+                                      setIsAvailabilityOpen(false);
+                                      setIsSettingsOpen(false);
+                                      setIsManualModalOpen(false);
+                                      setSelectedMessage(null);
+                                    }}
+                                    className="p-2 rounded-lg bg-white border border-pink-100 shadow-sm hover:bg-brand-primary/5 hover:border-brand-primary/30 text-slate-400 hover:text-brand-primary transition-all"
+                                    title="Edit"
+                                  >
+                                    <Edit2 size={16} />
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                )}
               </table>
+
+              {/* Mobile Cards */}
+              <div className="md:hidden">
+                {loading ? <MobileCardSkeleton /> : bookings.length === 0 ? (
+                  <div className="py-24 text-center text-slate-500 font-medium">No bookings found in vault.</div>
+                ) : (
+                  <div className="divide-y divide-pink-100/30">
+                    {bookings.map((b) => {
+                      const today = new Date();
+                      const bookingDate = new Date(b.date);
+                      const isToday = isSameDay(bookingDate, today);
+                      const isPastDay = bookingDate < new Date(today.setHours(0,0,0,0));
+                      const isCompleted = isPastDay || (isToday && b.time_slot.split('-')[1] < format(new Date(), 'HH:mm'));
+
+                      return (
+                        <div key={b.id} className="p-6 space-y-4">
+                          <div className="flex justify-between items-start">
+                            <div className="px-3 py-1 rounded-lg bg-brand-primary/5 text-brand-primary border border-pink-100 text-xs font-bold">
+                              Screen {b.screen_name}
+                            </div>
+                            <span className={`inline-flex px-2 py-1 rounded-full text-[9px] font-black tracking-widest uppercase ${
+                              isCompleted ? 'bg-slate-100 text-slate-500 border border-slate-200' :
+                              (b.status === 'booked' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 
+                              (b.status === 'cancelled' ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-amber-50 text-amber-600 border border-amber-100'))
+                            }`}>
+                              {isCompleted ? 'completed' : b.status}
+                            </span>
+                          </div>
+                          <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
+                            <div>
+                              <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Date & Time</div>
+                              <div className="text-sm font-bold text-slate-800">{format(new Date(b.date), 'dd MMM yyyy')}</div>
+                              <div className="text-brand-accent text-xs font-bold">{formatTimeSlot(b.time_slot)}</div>
+                            </div>
+                            <div className="text-left xs:text-right">
+                              <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Customer</div>
+                              <div className="text-sm font-bold text-slate-800">{b.customer_name}</div>
+                              <div className="text-slate-400 text-xs font-mono">{b.phone}</div>
+                            </div>
+                          </div>
+                          {!isCompleted && (
+                            <div className="pt-2 flex justify-end">
+                              <button
+                                onClick={() => {
+                                  setEditingBooking(b);
+                                  setCustomSlot(b.time_slot);
+                                  setIsCustom(!slots.includes(b.time_slot));
+                                  setIsAvailabilityOpen(false);
+                                  setIsSettingsOpen(false);
+                                  setIsManualModalOpen(false);
+                                  setSelectedMessage(null);
+                                }}
+                                className="w-full xs:w-auto flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-slate-50 text-slate-600 text-xs font-bold border border-slate-100 active:scale-95 transition-all"
+                              >
+                                <Edit2 size={14} /> Edit Re-Schedule
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Pagination */}
@@ -462,69 +567,106 @@ const Dashboard = () => {
                 <p className="text-xs text-slate-400 font-bold tracking-wide">Showing {messages.length} of {messageTotal} messages</p>
               </div>
             </div>
-            
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+              {/* Desktop Table */}
+              <table className="hidden md:table w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50/50">
                     <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-slate-400 border-b border-pink-100/50">Sender</th>
-                    <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-slate-400 border-b border-pink-100/50">Snippet</th>
+                    <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-slate-400 border-b border-pink-100/50">Message</th>
                     <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-slate-400 border-b border-pink-100/50">Date</th>
                     <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-slate-400 border-b border-pink-100/50">Status</th>
-                    <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-slate-400 border-b border-pink-100/50 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
-                  {loading ? (
-                    <tr><td colSpan="5" className="py-24 text-center"><Loader2 className="animate-spin inline-block text-brand-primary" size={40} /></td></tr>
-                  ) : messages.length === 0 ? (
-                    <tr><td colSpan="5" className="py-24 text-center text-slate-500 font-medium">No messages in inbox.</td></tr>
-                  ) : (
-                    messages.map((m) => (
-                      <tr key={m.id} className={`hover:bg-pink-50/20 transition-colors group ${!m.is_read ? 'bg-brand-primary/[0.02]' : ''}`}>
-                        <td className="px-8 py-6">
-                           <div className="text-slate-800 font-bold">{m.name}</div>
-                           <div className="text-slate-400 text-xs font-medium">{m.email}</div>
-                        </td>
-                        <td className="px-8 py-6 max-w-xs overflow-hidden text-ellipsis whitespace-nowrap text-sm text-slate-500 font-medium">
-                          {m.message}
-                        </td>
-                        <td className="px-8 py-6 text-sm text-slate-400 font-bold">
-                          {format(new Date(m.created_at), 'dd MMM, HH:mm')}
-                        </td>
-                        <td className="px-8 py-6">
-                        <span className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase ${
-                          m.is_read ? 'bg-slate-100 text-slate-400 border border-slate-200' : 'bg-brand-primary/10 text-brand-primary border border-pink-200'
-                        }`}>
-                          {m.is_read ? 'read' : 'new'}
-                        </span>
-                        </td>
-                        <td className="px-8 py-6 text-right">
-                          <div className="flex gap-2 justify-end">
-                            <button
-                               onClick={() => {
-                                 setSelectedMessage(m);
-                                 setIsAvailabilityOpen(false);
-                                 setIsSettingsOpen(false);
-                                 setIsManualModalOpen(false);
-                               }}
-                               className="p-2 rounded-lg bg-white border border-pink-100 shadow-sm hover:bg-brand-primary/5 hover:border-brand-primary/30 text-slate-400 hover:text-brand-primary transition-all"
+                {loading ? <TableSkeleton cols={4} /> : (
+                  <tbody className="divide-y divide-white/5">
+                    {messages.length === 0 ? (
+                      <tr><td colSpan="4" className="py-24 text-center text-slate-500 font-medium">No messages in inbox.</td></tr>
+                    ) : (
+                      messages.map((m) => (
+                        <tr key={m.id} className={`hover:bg-pink-50/20 transition-colors group ${!m.is_read ? 'bg-brand-primary/[0.02]' : ''}`}>
+                          <td className="px-8 py-6">
+                             <div className="text-slate-800 font-bold">{m.name}</div>
+                             <div className="text-slate-400 text-xs font-medium">{m.email}</div>
+                          </td>
+                          <td className="px-8 py-6 max-w-sm">
+                            <div 
+                              className="text-slate-600 text-sm font-medium line-clamp-2 cursor-pointer hover:text-brand-primary transition-colors"
+                              onClick={() => {
+                                setSelectedMessage(m);
+                                if (!m.is_read) {
+                                  adminService.toggleInquiryRead(m.id, true).then(() => fetchMessages());
+                                }
+                              }}
                             >
-                               <Filter size={16} />
-                            </button>
+                              {m.message}
+                            </div>
+                          </td>
+                          <td className="px-8 py-6 whitespace-nowrap">
+                            <div className="text-slate-400 text-xs font-bold">{format(new Date(m.created_at), 'dd MMM, HH:mm')}</div>
+                          </td>
+                          <td className="px-8 py-6">
                             <button
-                               onClick={() => deleteMessage(m.id)}
-                               className="p-2 rounded-lg bg-white border border-pink-100 shadow-sm hover:bg-red-50 hover:border-red-200 text-slate-400 hover:text-red-500 transition-all"
+                              onClick={() => {
+                                adminService.toggleInquiryRead(m.id, !m.is_read).then(() => fetchMessages());
+                              }}
+                              className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase transition-all cursor-pointer ${
+                                m.is_read ? 'bg-slate-100 text-slate-400 border border-slate-200 hover:bg-slate-200' : 'bg-pink-50 text-brand-primary border border-pink-100 hover:bg-pink-100'
+                              }`}
                             >
-                               <Trash2 size={16} />
+                              {m.is_read ? 'read' : 'new'}
                             </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                )}
               </table>
+
+              {/* Mobile Cards */}
+              <div className="md:hidden">
+                {loading ? <MobileCardSkeleton /> : messages.length === 0 ? (
+                  <div className="py-24 text-center text-slate-500 font-medium">No messages in inbox.</div>
+                ) : (
+                  <div className="divide-y divide-pink-100/30">
+                    {messages.map((m) => (
+                      <div key={m.id} className={`p-6 space-y-4 ${!m.is_read ? 'bg-brand-primary/[0.02]' : ''}`}>
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div className="text-sm font-bold text-slate-800">{m.name}</div>
+                            <div className="text-[10px] text-slate-400 font-medium">{m.email}</div>
+                          </div>
+                          <button
+                            onClick={() => {
+                              adminService.toggleInquiryRead(m.id, !m.is_read).then(() => fetchMessages());
+                            }}
+                            className={`px-3 py-1 rounded-full text-[9px] font-black tracking-widest uppercase border ${
+                              m.is_read ? 'bg-slate-100 text-slate-400 border-slate-200' : 'bg-pink-50 text-brand-primary border-pink-100'
+                            }`}
+                          >
+                            {m.is_read ? 'read' : 'new'}
+                          </button>
+                        </div>
+                        <div 
+                          className="p-4 rounded-2xl bg-white border border-pink-100/30 text-xs font-medium text-slate-600 line-clamp-3 leading-relaxed active:bg-slate-50 transition-colors"
+                          onClick={() => {
+                            setSelectedMessage(m);
+                            if (!m.is_read) {
+                              adminService.toggleInquiryRead(m.id, true).then(() => fetchMessages());
+                            }
+                          }}
+                        >
+                          {m.message}
+                        </div>
+                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                          Received {format(new Date(m.created_at), 'dd MMM yyyy, HH:mm')}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Pagination */}
@@ -560,62 +702,84 @@ const Dashboard = () => {
           >
             <div 
               ref={modalRef}
-              className="glass-card-premium w-full max-w-lg p-10 relative isolate overflow-hidden max-h-[90vh] overflow-y-auto shadow-2xl shadow-black/50"
+              className={`${selectedMessage ? 'bg-white rounded-[40px] max-w-xl' : 'glass-card-premium max-w-lg'} w-full p-6 md:p-10 relative isolate animate-in zoom-in-95 duration-300 shadow-2xl shadow-black/20 overflow-y-auto max-h-[90vh]`}
               onClick={e => e.stopPropagation()}
             >
               <button 
                 onClick={() => closeModal()} 
-                className="absolute top-6 right-6 p-2 rounded-full hover:bg-pink-50 transition-colors text-slate-400"
+                className="absolute top-8 right-8 p-3 rounded-2xl bg-slate-50 text-slate-400 hover:text-brand-primary hover:bg-brand-primary/5 transition-all z-20"
               >
                 <X size={20} />
               </button>
 
-              {/* Message Details Modal Content */}
+              {/* Message Details Modal Content (Premium Version) */}
               {selectedMessage && (
-                <>
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                   <div className="mb-10">
-                    <div className="inline-block px-3 py-1 rounded bg-brand-primary/5 text-brand-primary text-[10px] font-black tracking-widest uppercase mb-4">INQUIRY DETAILS</div>
-                    <h3 className="text-3xl mb-1 text-slate-900">{selectedMessage.name}</h3>
-                    <p className="text-brand-primary font-bold text-sm">{selectedMessage.email}</p>
-                    <p className="text-slate-400 text-xs mt-1 font-medium">{format(new Date(selectedMessage.created_at), 'PPPP p')}</p>
+                    <div className="inline-flex px-4 py-1.5 rounded-full bg-brand-primary/10 text-brand-primary text-[10px] font-black tracking-[0.2em] uppercase mb-4 border border-brand-primary/20">
+                      Customer Inquiry
+                    </div>
+                    <h2 className="text-3xl font-normal text-slate-900 tracking-tight leading-tight">
+                      Inquiry from <span className="text-gradient-premium">{selectedMessage.name}</span>
+                    </h2>
                   </div>
 
-                  <div className="space-y-6">
-                    <div className="p-6 rounded-2xl bg-slate-50 border border-pink-100/50 leading-relaxed text-slate-700 whitespace-pre-wrap text-sm italic">
-                      "{selectedMessage.message}"
+                  <div className="space-y-8 bg-slate-50/50 p-8 rounded-3xl border border-pink-100/50">
+                    <div className="grid grid-cols-2 gap-6">
+                      <div>
+                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Email</div>
+                        <div className="text-sm font-bold text-slate-700 select-all">{selectedMessage.email}</div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Date Received</div>
+                        <div className="text-sm font-bold text-slate-700">{format(new Date(selectedMessage.created_at), 'dd MMM yyyy, HH:mm')}</div>
+                      </div>
                     </div>
 
-                    <div className="flex gap-4 pt-4">
-                      <button onClick={() => closeModal()} className="btn-outline-premium flex-1">Close</button>
-                      {!selectedMessage.is_read && (
-                        <button
-                          onClick={() => {
-                            markMessageAsRead(selectedMessage.id);
-                            closeModal();
-                          }}
-                          className="btn-premium flex-[2]"
-                        >
-                          <CheckCircle2 size={18} /> Mark as Read
-                        </button>
-                      )}
+                    <div>
+                      <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Message Details</div>
+                      <div className="text-slate-600 text-base leading-relaxed font-medium bg-white p-6 rounded-2xl border border-pink-100/30 shadow-sm max-h-[300px] overflow-y-auto break-words">
+                        {selectedMessage.message}
+                      </div>
                     </div>
                   </div>
-                </>
+
+                  <div className="mt-10 flex justify-end">
+                    <button 
+                      onClick={() => closeModal()}
+                      className="px-10 py-4 rounded-2xl bg-slate-900 text-white font-bold text-sm shadow-xl shadow-slate-900/10 hover:shadow-slate-900/20 active:scale-95 transition-all"
+                    >
+                      Close Inquiry
+                    </button>
+                  </div>
+                </div>
               )}
 
               {/* Edit Booking Modal Content */}
               {editingBooking && (
                 <>
-                  <div className="mb-10">
-                    <div className="inline-block px-3 py-1 rounded bg-brand-primary/5 text-brand-primary text-[10px] font-black tracking-widest uppercase mb-4">RE-SCHEDULE</div>
-                    <h3 className="text-3xl mb-2 text-slate-900">Modify Slot</h3>
-                    <p className="text-slate-500 font-medium text-sm">Updating for <span className="text-brand-primary font-bold">{editingBooking.customer_name}</span></p>
+                  <div className="mb-10 pt-2">
+                    <div className="inline-block px-3 py-1 rounded bg-brand-primary/5 text-brand-primary text-[10px] font-black tracking-widest uppercase mb-4 border border-pink-100/50">RE-SCHEDULE</div>
+                    <h3 className="text-2xl md:text-3xl mb-2 text-slate-900">Modify Slot</h3>
+                    <p className="text-slate-500 font-medium text-xs md:text-sm">Updating for <span className="text-brand-primary font-bold">{editingBooking.customer_name}</span></p>
                   </div>
 
                   <div className="space-y-8">
                     <div className="p-5 rounded-2xl bg-slate-50 border border-pink-100/50 flex justify-between items-center">
-                      <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Selected Screen</div>
-                      <div className="font-bold text-brand-primary">Screen {editingBooking.screen_name}</div>
+                      <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Selected Hall</div>
+                      <select 
+                        className="bg-transparent font-bold text-brand-primary outline-none cursor-pointer"
+                        value={editingBooking.screen_id}
+                        onChange={(e) => {
+                          const screenId = e.target.value;
+                          const screenName = screens.find(s => s.id === screenId)?.name || '';
+                          setEditingBooking({ ...editingBooking, screen_id: screenId, screen_name: screenName });
+                        }}
+                      >
+                        {screens.map(s => (
+                          <option key={s.id} value={s.id}>Screen {s.name}</option>
+                        ))}
+                      </select>
                     </div>
 
                     <div>
@@ -671,14 +835,17 @@ const Dashboard = () => {
                       </div>
                     )}
 
-                    <div className="flex gap-4 pt-4">
-                      <button onClick={() => closeModal()} className="btn-outline-premium flex-1">Cancel</button>
+                    <div className="flex flex-col sm:flex-row gap-3 pt-6 pb-2">
+                      <button onClick={() => closeModal()} className="btn-outline-premium w-full sm:flex-1 order-2 sm:order-1">Cancel</button>
                       <button
                         disabled={editLoading}
                         onClick={async () => {
                           setEditLoading(true);
                           try {
-                            await adminService.updateBooking(editingBooking.id, { time_slot: editingBooking.time_slot });
+                            await adminService.updateBooking(editingBooking.id, { 
+                              time_slot: editingBooking.time_slot,
+                              screen_id: editingBooking.screen_id
+                            });
                             closeModal(() => fetchBookings());
                           } catch (err) {
                             setEditError(err.response?.data?.message || 'Update failed');
@@ -686,7 +853,7 @@ const Dashboard = () => {
                             setEditLoading(false);
                           }
                         }}
-                        className="btn-premium flex-[2]"
+                        className="btn-premium w-full sm:flex-[2] order-1 sm:order-2 px-4 py-4"
                       >
                         {editLoading ? <Loader2 className="animate-spin" size={20} /> : 'Save Changes'}
                       </button>
@@ -698,10 +865,10 @@ const Dashboard = () => {
               {/* Manual Booking Modal Content */}
               {isManualModalOpen && (
                 <>
-                  <div className="mb-10">
-                    <div className="inline-block px-3 py-1 rounded bg-emerald-50 text-emerald-600 text-[10px] font-black tracking-widest uppercase mb-4">BYPASS ENGINE</div>
-                    <h3 className="text-3xl mb-2 text-slate-900">Manual Entry</h3>
-                    <p className="text-slate-500 font-medium text-sm">Force book a slot directly into the system.</p>
+                  <div className="mb-10 pt-2">
+                    <div className="inline-block px-3 py-1 rounded bg-emerald-50 text-emerald-600 text-[10px] font-black tracking-widest uppercase mb-4 border border-emerald-100/50">BYPASS ENGINE</div>
+                    <h3 className="text-2xl md:text-3xl mb-2 text-slate-900">Manual Entry</h3>
+                    <p className="text-slate-500 font-medium text-xs md:text-sm">Force book a slot directly into the system.</p>
                   </div>
 
                   <div className="space-y-6">
@@ -788,7 +955,7 @@ const Dashboard = () => {
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
                       <div>
                         <label className="text-xs font-black text-slate-500 uppercase tracking-widest block mb-2">Phone</label>
                         <input 
@@ -817,8 +984,8 @@ const Dashboard = () => {
                       </div>
                     )}
 
-                    <div className="flex gap-4 pt-6">
-                      <button onClick={() => closeModal()} className="btn-outline-premium flex-1">Cancel</button>
+                    <div className="flex flex-col sm:flex-row gap-3 pt-8 pb-4">
+                      <button onClick={() => closeModal()} className="btn-outline-premium w-full sm:flex-1 order-2 sm:order-1">Cancel</button>
                       <button
                         disabled={actionLoading === 'manual-booking'}
                         onClick={async () => {
@@ -843,7 +1010,7 @@ const Dashboard = () => {
                             setActionLoading(null);
                           }
                         }}
-                        className="btn-premium flex-[2]"
+                        className="btn-premium w-full sm:flex-[2] order-1 sm:order-2 px-4 py-4"
                       >
                         {actionLoading === 'manual-booking' ? <Loader2 className="animate-spin" size={20} /> : 'Confirm Reservation'}
                       </button>
@@ -855,10 +1022,10 @@ const Dashboard = () => {
               {/* Shift Settings Modal Content */}
               {isSettingsOpen && (
                 <>
-                  <div className="mb-10">
-                    <div className="inline-block px-3 py-1 rounded bg-amber-50 text-amber-600 text-[10px] font-black tracking-widest uppercase mb-4">CONFIGURATION</div>
-                    <h3 className="text-3xl mb-2 text-slate-900">Shift Control</h3>
-                    <p className="text-slate-500 font-medium text-sm">Define operational windows for each screen.</p>
+                  <div className="mb-10 pt-2">
+                    <div className="inline-block px-3 py-1 rounded bg-amber-50 text-amber-600 text-[10px] font-black tracking-widest uppercase mb-4 border border-amber-100/50">CONFIGURATION</div>
+                    <h3 className="text-2xl md:text-3xl mb-2 text-slate-900">Shift Control</h3>
+                    <p className="text-slate-500 font-medium text-xs md:text-sm">Define operational windows for each screen.</p>
                   </div>
 
                   <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-none">
@@ -929,8 +1096,8 @@ const Dashboard = () => {
                     </div>
                   )}
 
-                  <div className="flex gap-4 pt-10">
-                    <button onClick={() => closeModal()} className="btn-outline-premium flex-1">Discard</button>
+                  <div className="flex flex-col sm:flex-row gap-3 pt-10 pb-4">
+                    <button onClick={() => closeModal()} className="btn-outline-premium w-full sm:flex-1 order-2 sm:order-1">Discard</button>
                     <button
                       disabled={actionLoading === 'sync-shifts'}
                       onClick={async () => {
@@ -942,9 +1109,11 @@ const Dashboard = () => {
                         } catch (err) { setEditError('Failed to sync shifts'); }
                         finally { setActionLoading(null); }
                       }}
-                      className="btn-premium flex-[2]"
+                      className="btn-premium w-full sm:flex-[2] order-1 sm:order-2 px-4 py-4"
                     >
-                      {actionLoading === 'sync-shifts' ? <Loader2 className="animate-spin" size={20} /> : 'Synchronize Shifts'}
+                      {actionLoading === 'sync-shifts' ? <Loader2 className="animate-spin" size={20} /> : (
+                        <span className="whitespace-nowrap">Synchronize Shifts</span>
+                      )}
                     </button>
                   </div>
                 </>
@@ -953,10 +1122,10 @@ const Dashboard = () => {
               {/* Availability Management Modal Content */}
               {isAvailabilityOpen && (
                 <>
-                  <div className="mb-10">
-                    <div className="inline-block px-3 py-1 rounded bg-brand-primary/5 text-brand-primary text-[10px] font-black tracking-widest uppercase mb-4">AVAILABILITY</div>
-                    <h3 className="text-3xl font-black mb-2 tracking-tight text-slate-900">Booking Window</h3>
-                    <p className="text-slate-500 font-medium text-sm">Control which dates are open for reservation.</p>
+                  <div className="mb-8 pt-2">
+                    <div className="inline-block px-3 py-1 rounded bg-brand-primary/5 text-brand-primary text-[10px] font-black tracking-widest uppercase mb-4 border border-pink-100/50">AVAILABILITY</div>
+                    <h3 className="text-2xl md:text-3xl font-black mb-2 tracking-tight text-slate-900">Booking Window</h3>
+                    <p className="text-slate-500 font-medium text-xs md:text-sm leading-relaxed">Control which dates are open for reservation.</p>
                   </div>
 
                   <div className="space-y-8">
@@ -1050,8 +1219,8 @@ const Dashboard = () => {
                       </div>
                     )}
 
-                    <div className="flex gap-4 pt-10">
-                      <button onClick={() => closeModal()} className="btn-outline-premium flex-1">Discard</button>
+                    <div className="flex flex-col sm:flex-row gap-3 pt-8 pb-4">
+                      <button onClick={() => closeModal()} className="btn-outline-premium w-full sm:flex-1 order-2 sm:order-1">Discard</button>
                       <button
                         disabled={editLoading}
                         onClick={async () => {
@@ -1067,9 +1236,11 @@ const Dashboard = () => {
                             setEditLoading(false);
                           }
                         }}
-                        className="btn-premium flex-[2]"
+                        className="btn-premium w-full sm:flex-[2] order-1 sm:order-2 px-4 py-4"
                       >
-                        {editLoading ? <Loader2 className="animate-spin" size={20} /> : 'Save Availability Settings'}
+                        {editLoading ? <Loader2 className="animate-spin" size={20} /> : (
+                          <span className="whitespace-nowrap">Save Availability Settings</span>
+                        )}
                       </button>
                     </div>
                   </div>
@@ -1078,6 +1249,7 @@ const Dashboard = () => {
             </div>
           </div>
         )}
+
       </div>
     </div>
   );

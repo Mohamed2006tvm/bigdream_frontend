@@ -96,8 +96,8 @@ const Home = () => {
                 transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
                 className="text-6xl md:text-7xl lg:text-[5rem] font-normal mb-8 tracking-tighter leading-[1.1] text-slate-800 drop-shadow-[0_10px_10px_rgba(0,0,0,0.02)]"
               >
-                <span className="text-gradient-premium">Secret</span> Birthday <br />
-                Surprises <br />
+                Magical Birthday <br />
+                Celebrations <br />
                 <span className="text-slate-800">Made Easy</span>
               </motion.h1>
               
@@ -107,7 +107,7 @@ const Home = () => {
                 transition={{ duration: 1, delay: 0.3 }}
                 className="text-lg md:text-xl text-slate-500 max-w-xl mb-10 leading-relaxed font-medium opacity-80"
               >
-                Plan the perfect surprise with our hidden venue, curated themes, and seamless booking experience. Create memories that last a lifetime.
+                Plan the perfect celebration with our hidden venue, curated themes, and seamless booking experience. Create memories that last a lifetime.
               </motion.p>
               
               <motion.div 
@@ -117,11 +117,11 @@ const Home = () => {
                 className="flex flex-col sm:flex-row gap-4 justify-start"
               >
                 <Link to="/book" className="btn-premium px-8 py-4 text-sm font-semibold rounded-full flex items-center justify-center gap-2 shadow-lg shadow-pink-500/30 hover:-translate-y-1 transition-all group">
-                  Plan a Surprise <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                  Plan a Celebration <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                 </Link>
-                <button className="px-8 py-4 text-sm font-semibold bg-white text-slate-800 rounded-full flex items-center justify-center shadow-lg shadow-slate-200/50 hover:bg-slate-50 hover:-translate-y-1 transition-all">
+                <Link to="/about" className="px-8 py-4 text-sm font-semibold bg-white text-slate-800 rounded-full flex items-center justify-center shadow-lg shadow-slate-200/50 hover:bg-slate-50 hover:-translate-y-1 transition-all">
                   View Virtual Tour
-                </button>
+                </Link>
               </motion.div>
             </div>
 
@@ -133,11 +133,11 @@ const Home = () => {
               className="relative hidden lg:block h-[500px] xl:h-[600px] w-full"
             >
               <div className="absolute top-0 right-0 w-[85%] h-[80%] rounded-[32px] overflow-hidden shadow-2xl shadow-pink-500/10 border-[8px] border-white z-10 transition-transform duration-500 hover:scale-[1.02]">
-                <img src={Screen1_1} alt="Birthday Surprise Showcase" className="w-full h-full object-cover" />
+                <img src={Screen1_1} alt="Birthday Celebration Showcase" className="w-full h-full object-cover" />
               </div>
               
               <div className="absolute bottom-4 left-0 w-[55%] h-[45%] rounded-[32px] overflow-hidden shadow-2xl shadow-purple-500/15 border-[8px] border-white z-20 transition-transform duration-500 hover:-translate-y-4">
-                <img src={Screen2_1} alt="Birthday Surprise Venue" className="w-full h-full object-cover" />
+                <img src={Screen2_1} alt="Birthday Celebration Venue" className="w-full h-full object-cover" />
               </div>
               
               <motion.div 
@@ -164,39 +164,15 @@ const Home = () => {
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
           {[
-            { label: 'Surprises Organized', value: '500+', icon: <Sparkles size={24} className="text-brand-primary" /> },
+            { label: 'Celebrations Organized', value: '500+', icon: <Sparkles size={24} className="text-brand-primary" /> },
             { label: 'Themed Experiences', value: '12', icon: <Monitor size={24} className="text-brand-primary" /> },
             { label: 'Happy Families', value: '1000+', icon: <Users size={24} className="text-brand-primary" /> },
-            { label: 'Surprise Concierge', value: '24/7', icon: <Phone size={24} className="text-brand-primary" /> }
+            { label: 'Celebration Concierge', value: '24/7', icon: <Phone size={24} className="text-brand-primary" /> }
           ].map((stat, i) => (
             <div key={i} className="bg-white p-10 rounded-[32px] flex flex-col items-center text-center group hover:-translate-y-2 transition-transform duration-300 shadow-xl shadow-pink-500/5 border border-pink-50/50">
               <div className="mb-4 group-hover:scale-110 transition-transform">{stat.icon}</div>
               <div className="text-5xl font-black text-brand-primary mb-2 tracking-tighter drop-shadow-sm">{stat.value}</div>
               <div className="text-xs font-medium text-slate-500">{stat.label}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="py-24 container mx-auto px-6">
-        <div className="text-center mb-24">
-          <h2 className="text-5xl font-normal text-slate-900 tracking-tight">How It <span className="text-gradient-premium">Works</span></h2>
-        </div>
-        <div className="grid md:grid-cols-3 gap-16 relative z-10">
-          <div className="absolute top-[40px] left-[16.66%] w-[66.66%] h-[2px] bg-slate-200 -z-10 hidden md:block"></div>
-          {[
-            { step: 1, title: 'Pick a Theme', desc: 'Select from our magic forest, royal palace, or space quest themes', icon: <Sparkles size={32} strokeWidth={1.5} /> },
-            { step: 2, title: 'Set the Timing', desc: 'Choose the perfect arrival time for the ultimate shock factor', icon: <Clock size={32} strokeWidth={1.5} /> },
-            { step: 3, title: 'Let Magic Happen', desc: 'We handle the decor, cake, and reveal—you bring the guest of honor', icon: <Star size={32} strokeWidth={1.5} /> }
-          ].map((item, i) => (
-            <div key={i} className="flex flex-col items-center text-center group">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-brand-primary to-brand-secondary text-white flex items-center justify-center mb-6 shadow-xl shadow-pink-500/20 group-hover:scale-110 transition-transform duration-300">
-                {item.icon}
-              </div>
-              <div className="text-brand-primary text-xs font-black uppercase tracking-widest mb-3">STEP {item.step}</div>
-              <h3 className="text-2xl font-bold text-slate-800 mb-3">{item.title}</h3>
-              <p className="text-slate-500 font-medium leading-relaxed">{item.desc}</p>
             </div>
           ))}
         </div>
@@ -251,16 +227,42 @@ const Home = () => {
         </div>
       </section>
 
+      {/* How It Works */}
+      <section className="py-24 container mx-auto px-6">
+        <div className="text-center mb-24">
+          <h2 className="text-5xl font-normal text-slate-900 tracking-tight">How It <span className="text-gradient-premium">Works</span></h2>
+        </div>
+        <div className="grid md:grid-cols-3 gap-16 relative z-10">
+          <div className="absolute top-[40px] left-[16.66%] w-[66.66%] h-[2px] bg-slate-200 -z-10 hidden md:block"></div>
+          {[
+            { step: 1, title: 'Pick a Theme', desc: 'Select from our magic forest, royal palace, or space quest themes', icon: <Sparkles size={32} strokeWidth={1.5} /> },
+            { step: 2, title: 'Set the Timing', desc: 'Choose the perfect arrival time for the ultimate shock factor', icon: <Clock size={32} strokeWidth={1.5} /> },
+            { step: 3, title: 'Let Magic Happen', desc: 'We handle the decor, cake, and reveal—you bring the guest of honor', icon: <Star size={32} strokeWidth={1.5} /> }
+          ].map((item, i) => (
+            <div key={i} className="flex flex-col items-center text-center group">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-brand-primary to-brand-secondary text-white flex items-center justify-center mb-6 shadow-xl shadow-pink-500/20 group-hover:scale-110 transition-transform duration-300">
+                {item.icon}
+              </div>
+              <div className="text-brand-primary text-xs font-black uppercase tracking-widest mb-3">STEP {item.step}</div>
+              <h3 className="text-2xl font-bold text-slate-800 mb-3">{item.title}</h3>
+              <p className="text-slate-500 font-medium leading-relaxed">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      
+
       {/* Why Choose */}
       <section className="py-24 container mx-auto px-6" id="about">
         <div className="text-center mb-20">
-          <h2 className="text-4xl md:text-5xl font-normal text-slate-900 tracking-tight">Why Choose <span className="text-gradient-premium">Birthday Surprise</span></h2>
+          <h2 className="text-4xl md:text-5xl font-normal text-slate-900 tracking-tight">Why Choose <span className="text-gradient-premium">My Big Dream</span></h2>
         </div>
         <div className="grid md:grid-cols-3 gap-8">
           {[
-            { title: 'Full Secrecy', desc: 'Hidden entrance and soundproofed walls for the perfect surprise reveal', icon: <Shield size={24} strokeWidth={1.5} /> },
+            { title: 'Full Secrecy', desc: 'Hidden entrance and soundproofed walls for the perfect reveal', icon: <Shield size={24} strokeWidth={1.5} /> },
             { title: 'Themed Decor', desc: 'Professional designers create an immersive world for your special day', icon: <Zap size={24} strokeWidth={1.5} /> },
-            { title: 'Surprise Support', desc: 'Our team acts as co-conspirators to ensure every detail is flawless', icon: <Users size={24} strokeWidth={1.5} /> }
+            { title: 'Party Support', desc: 'Our team acts as co-conspirators to ensure every detail is flawless', icon: <Users size={24} strokeWidth={1.5} /> }
           ].map((item, i) => (
             <div key={i} className="bg-white p-8 rounded-[32px] hover:-translate-y-2 transition-transform duration-300 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.08)]">
               <div className="w-12 h-12 rounded-[14px] bg-gradient-to-br from-brand-primary to-brand-secondary text-white flex items-center justify-center mb-6 shadow-md shadow-pink-500/20">
@@ -278,7 +280,7 @@ const Home = () => {
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-normal text-slate-900 tracking-tight">Venue <span className="text-gradient-premium">Themes</span></h2>
-            <p className="text-slate-500 mt-4 text-base font-medium">Choose a magical world for your birthday surprise</p>
+            <p className="text-slate-500 mt-4 text-base font-medium">Choose a magical world for your birthday celebration</p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {[
@@ -343,7 +345,7 @@ const Home = () => {
       </section>
 
 
-      {/* Ready to Book CTA */}
+      {/* Ready to Book */}
       <section className="py-32 container mx-auto px-6">
         <div className="bg-gradient-to-br from-brand-primary via-brand-primary to-brand-secondary rounded-[40px] md:rounded-[60px] p-10 md:p-20 text-center text-white shadow-3xl shadow-pink-500/40 relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-6 md:p-20 text-white/10 group-hover:rotate-12 transition-transform duration-700">

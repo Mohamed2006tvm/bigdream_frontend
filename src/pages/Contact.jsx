@@ -36,14 +36,15 @@ const Contact = () => {
       const data = await response.json();
 
       if (response.ok) {
-        setSubmitStatus('success');
+        setSubmitStatus({ type: 'success', message: 'Ideas received! We\'ll start planning soon.' });
         setFormData({ name: '', email: '', message: '' });
       } else {
-        throw new Error(data.message || 'Failed to send message');
+        const errorMsg = data.errors ? data.errors.map(e => e.msg).join(', ') : (data.message || 'Failed to send message');
+        throw new Error(errorMsg);
       }
     } catch (err) {
       console.error('Submit error:', err);
-      setSubmitStatus('error');
+      setSubmitStatus({ type: 'error', message: err.message || 'Failed to send message' });
     } finally {
       setIsSubmitting(false);
     }
@@ -59,10 +60,10 @@ const Contact = () => {
       <div className="container mx-auto px-6 py-16 md:py-24 animate-fade-in relative z-10">
         <div className="text-center mb-16">
           <h1 className="text-5xl md:text-6xl font-normal mb-6 tracking-tighter text-slate-800 drop-shadow-[0_10px_10px_rgba(0,0,0,0.02)]">
-            Plan the <span className="text-gradient-premium">Ultimate Surprise</span>
+            Plan the <span className="text-gradient-premium">Ultimate Celebration</span>
           </h1>
           <p className="text-slate-500 font-medium text-lg leading-relaxed max-w-2xl mx-auto">
-            Ready to create a magical moment? Tell us about your surprise idea, and our team of celebration experts will help you bring it to life.
+            Ready to create a magical moment? Tell us about your celebration idea, and our team of experts will help you bring it to life.
           </p>
         </div>
 
@@ -70,7 +71,7 @@ const Contact = () => {
           
           {/* Left Column: Form */}
           <div className="lg:col-span-3 bg-white p-10 md:p-12 rounded-[32px] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.08)]">
-            <h2 className="text-3xl font-normal text-slate-900 mb-8 tracking-tight">Your <span className="text-gradient-premium">Surprise Idea</span></h2>
+            <h2 className="text-3xl font-normal text-slate-900 mb-8 tracking-tight">Your <span className="text-gradient-premium">Celebration Idea</span></h2>
             
             <form className="space-y-6 text-left" onSubmit={handleSubmit}>
               <div>
@@ -107,21 +108,21 @@ const Contact = () => {
                   onChange={handleChange}
                   required
                   rows="4"
-                  placeholder="Tell us about your surprise vision..." 
+                  placeholder="Tell us about your celebration vision..." 
                   className="w-full px-5 py-4 rounded-2xl bg-slate-50/50 border border-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary/40 transition-all font-medium text-slate-700 text-sm placeholder:text-slate-400 resize-none"
                 ></textarea>
               </div>
 
-              {submitStatus === 'success' && (
+              {submitStatus?.type === 'success' && (
                 <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 px-4 py-3 rounded-xl text-sm font-semibold border border-emerald-100 animate-in fade-in slide-in-from-top-1">
                   <CheckCircle2 size={18} />
-                  Ideas received! We'll start planning soon.
+                  {submitStatus.message}
                 </div>
               )}
 
-              {submitStatus === 'error' && (
+              {submitStatus?.type === 'error' && (
                 <div className="text-red-600 bg-red-50 px-4 py-3 rounded-xl text-sm font-semibold border border-red-100 animate-in fade-in slide-in-from-top-1">
-                  Failed to send message. Please try again later.
+                  {submitStatus.message}
                 </div>
               )}
 
@@ -147,7 +148,7 @@ const Contact = () => {
             
             {/* Contact Details Card */}
             <div className="bg-white p-10 md:p-10 rounded-[32px] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.08)] text-left flex-1">
-              <h2 className="text-2xl font-normal text-slate-800 font-display mb-8">Surprise Concierge</h2>
+              <h2 className="text-2xl font-normal text-slate-800 font-display mb-8">Dream Concierge</h2>
               <div className="space-y-8">
                 <div className="flex items-center gap-5">
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-primary to-brand-secondary text-white flex items-center justify-center shadow-md shadow-pink-500/20 shrink-0">
@@ -178,7 +179,7 @@ const Contact = () => {
               <div className="space-y-2">
                 <p className="text-sm font-medium text-slate-500">Mon – Sat: 9:00 AM – 9:00 PM</p>
                 <p className="text-sm font-medium text-slate-500">Sun: 10:00 AM – 6:00 PM</p>
-                <p className="text-xs font-bold text-brand-primary mt-4 uppercase tracking-wider">Surprises available 24/7</p>
+                <p className="text-xs font-bold text-brand-primary mt-4 uppercase tracking-wider">Celebrations available 24/7</p>
               </div>
             </div>
 

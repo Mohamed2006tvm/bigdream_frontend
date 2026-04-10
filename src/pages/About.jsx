@@ -32,17 +32,17 @@ const About = () => {
       <div className="container mx-auto px-6 py-24 animate-fade-in">
         <div className="text-center mb-20">
           <h1 className="text-5xl md:text-6xl font-normal mb-6 tracking-tighter text-gradient-premium drop-shadow-[0_10px_10px_rgba(0,0,0,0.02)]">The Magic Behind Birthdays</h1>
-          <p className="text-slate-500 font-medium text-lg leading-relaxed">Dedicated to creating heart-pounding surprise moments and unforgettable birthday memories</p>
+          <p className="text-slate-500 font-medium text-lg leading-relaxed">Dedicated to creating heart-pounding celebration moments and unforgettable birthday memories</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-16 items-center max-w-6xl mx-auto mb-20">
           <div>
-            <h2 className="text-3xl md:text-4xl font-normal text-slate-800 mb-8 tracking-tight">Crafting the Perfect <span className="text-gradient-premium">Birthday Surprise</span></h2>
+            <h2 className="text-3xl md:text-4xl font-normal text-slate-800 mb-8 tracking-tight">Crafting the Perfect <span className="text-gradient-premium">Birthday Celebration</span></h2>
             <p className="text-slate-500 font-medium leading-relaxed mb-6">
-              Our venue features magically themed immersive worlds with professional decor, high-end sound systems, and a dedicated surprise management team. Every detail is crafted to ensure your surprise is a flawless success.
+              Our venue features magically themed immersive worlds with professional decor, high-end sound systems, and a dedicated management team. Every detail is crafted to ensure your celebration is a flawless success.
             </p>
             <p className="text-slate-500 font-medium leading-relaxed">
-              Whether it's a 1st birthday, a sweet sixteen, or a milestone 50th, our versatile themes adapt to your vision with magical decor and a team of surprise experts.
+              Whether it's a 1st birthday, a sweet sixteen, or a milestone 50th, our versatile themes adapt to your vision with magical decor and a team of experts.
             </p>
           </div>
           
@@ -56,7 +56,7 @@ const About = () => {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.8 }}
                 className="absolute inset-0 w-full h-full object-cover"
-                alt="Birthday Surprise Showcase"
+                alt="Birthday Celebration Showcase"
               />
             </AnimatePresence>
 

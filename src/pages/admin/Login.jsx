@@ -14,11 +14,16 @@ const Login = () => {
   const cardRef = useRef(null);
 
   useEffect(() => {
+    // If already logged in, redirect to dashboard
+    if (sessionStorage.getItem('token')) {
+      navigate('/admin/dashboard', { replace: true });
+      return;
+    }
     gsap.fromTo(cardRef.current, 
       { scale: 0.9, opacity: 0, y: 20 },
       { scale: 1, opacity: 1, y: 0, duration: 0.6, ease: 'back.out(1.7)' }
     );
-  }, []);
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,8 +31,11 @@ const Login = () => {
     setError('');
     try {
       const { data } = await adminService.login(credentials);
-      localStorage.setItem('token', data.data.token);
-      localStorage.setItem('admin', JSON.stringify(data.data.admin));
+      // Store token in sessionStorage (HttpOnly cookie is also set automatically)
+      // sessionStorage is used to track login state client-side.
+      // It's cleared when the browser tab closes (more secure than localStorage).
+      sessionStorage.setItem('token', data.data.token);
+      sessionStorage.setItem('admin', JSON.stringify(data.data.admin));
       
       gsap.to(cardRef.current, { 
         scale: 1.05, 
@@ -36,7 +44,8 @@ const Login = () => {
         onComplete: () => navigate('/admin/dashboard') 
       });
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Please check credentials.');
+      const msg = err.response?.data?.message || 'Login failed. Please check your credentials.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -57,11 +66,11 @@ const Login = () => {
             <div className="inline-flex p-3 rounded-2xl bg-brand-primary/10 text-brand-primary mb-6">
               <ShieldCheck size={32} />
             </div>
-            <h2 className="text-3xl mb-2 text-slate-900">Surprise <span className="text-gradient-premium">Management</span></h2>
-            <p className="text-slate-500 font-medium tracking-wide translate-y-[-2px]">Secure access to secret venue controls</p>
+            <h2 className="text-3xl mb-2 text-slate-900">Admin <span className="text-gradient-premium">Management</span></h2>
+            <p className="text-slate-500 font-medium tracking-wide translate-y-[-2px]">Secure access to venue controls</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
             <div className="space-y-4">
               <div className="relative group">
                 <User 
@@ -69,11 +78,13 @@ const Login = () => {
                   size={18} 
                 />
                 <input
+                  id="admin-username"
                   required
                   className="premium-input pl-12"
                   placeholder="Username"
                   value={credentials.username}
                   onChange={e => setCredentials({...credentials, username: e.target.value})}
+                  autoComplete="username"
                 />
               </div>
               
@@ -83,23 +94,26 @@ const Login = () => {
                   size={18} 
                 />
                 <input
+                  id="admin-password"
                   required
                   type="password"
                   className="premium-input pl-12"
                   placeholder="Password"
                   value={credentials.password}
                   onChange={e => setCredentials({...credentials, password: e.target.value})}
+                  autoComplete="current-password"
                 />
               </div>
             </div>
 
             {error && (
-              <div className="flex items-center gap-3 p-4 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm">
+              <div className="flex items-center gap-3 p-4 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm" role="alert">
                 <AlertCircle size={18} /> <span>{error}</span>
               </div>
             )}
 
             <button 
+              id="admin-login-btn"
               disabled={loading} 
               type="submit" 
               className="btn-premium w-full text-lg shadow-xl"

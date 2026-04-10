@@ -7,9 +7,9 @@ const Footer = () => {
       <div className="container mx-auto px-6 max-w-6xl">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
           <div className="col-span-1">
-            <Link to="/" className="text-3xl font-normal text-brand-primary font-display block mb-4">Birthday Surprise</Link>
+            <Link to="/" className="text-3xl font-normal text-brand-primary font-display block mb-4">My Big Dream</Link>
             <p className="text-slate-500 text-sm max-w-xs leading-relaxed font-medium">
-              Create unforgettable memories with our curated birthday surprise experiences and exclusive hidden venues.
+              Create unforgettable memories with our curated birthday celebration experiences and exclusive hidden venues.
             </p>
           </div>
           
@@ -34,7 +34,7 @@ const Footer = () => {
         </div>
         
         <div className="border-t border-slate-200/60 pt-8 text-center flex items-center justify-center">
-          <p className="text-slate-400 text-[11px] font-medium tracking-wide">© 2026 Birthday Surprise. All rights reserved.</p>
+          <p className="text-slate-400 text-[11px] font-medium tracking-wide">© 2026 My Big Dream. All rights reserved.</p>
         </div>
       </div>
     </footer>

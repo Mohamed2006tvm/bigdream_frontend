@@ -117,9 +117,9 @@ const Availability = () => {
       <div className="container mx-auto px-6 py-12">
         <header className="mb-12">
           <h2 className="text-4xl md:text-5xl mb-4 font-normal font-display">
-            The <span className="text-gradient-premium">Surprise Calendar</span>
+            The <span className="text-gradient-premium">Dream Calendar</span>
           </h2>
-          <p className="text-slate-500 font-medium">Pick the perfect moment for your ultimate surprise reveal.</p>
+          <p className="text-slate-500 font-medium">Pick the perfect moment for your ultimate celebration.</p>
         </header>
 
         {/* Date Selector */}
@@ -164,7 +164,7 @@ const Availability = () => {
                   <AlertCircle className="text-amber-500" size={48} />
                 </div>
                 <h3 className="text-2xl font-display mb-2">The Magic is Resting</h3>
-                <p className="text-slate-500 max-w-md mx-auto">Our surprise halls are currently undergoing a festive transformation. Check back soon for more magic!</p>
+                <p className="text-slate-500 max-w-md mx-auto">Our celebration halls are currently undergoing a festive transformation. Check back soon!</p>
               </div>
             ) : availability.map((screen) => (
               <div key={screen.screen_id} className="glass-card-premium p-8 flex flex-col h-full">
@@ -264,7 +264,7 @@ const Availability = () => {
 
               <div className="mb-10">
                 <div className="inline-block px-3 py-1 rounded bg-brand-primary/20 text-brand-primary text-xs font-bold mb-4">RESERVATION</div>
-                <h3 className="text-3xl mb-2 text-slate-900">Secure the Surprise</h3>
+                <h3 className="text-3xl mb-2 text-slate-900">Secure your Dream</h3>
                 <p className="text-slate-500 flex items-center gap-2 font-medium">
                   {selectedSlot.screenName === 'A' ? 'Magic Forest' :
                     selectedSlot.screenName === 'B' ? 'Royal Palace' :
@@ -343,7 +343,7 @@ const Availability = () => {
                     {bookingStatus.type === 'loading' ? (
                       <span className="flex items-center gap-2"><Loader2 size={18} className="animate-spin" /> Confirming...</span>
                     ) : (
-                      'Confirm Surprise'
+                      'Confirm Reservation'
                     )}
                   </button>
                 </div>

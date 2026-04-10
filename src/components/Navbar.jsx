@@ -28,13 +28,13 @@ const Navbar = () => {
   ];
 
   return (
-    <nav ref={navRef} className="sticky top-0 z-50 h-[80px] flex items-center justify-between px-6 md:px-8 bg-white/80 backdrop-blur-md border-b border-slate-100/50">
-      <Link to="/" className="flex items-center gap-2 group z-50">
-        <span className="text-3xl font-normal text-brand-primary font-display transition-colors">The Dream Surprise</span>
+    <nav ref={navRef} className="sticky top-0 z-50 h-[70px] md:h-[80px] flex items-center justify-between px-4 md:px-8 bg-white/80 backdrop-blur-md border-b border-slate-100/50">
+      <Link to="/" className="flex items-center gap-2 group z-50 shrink-0">
+        <span className="text-2xl md:text-3xl font-normal text-brand-primary font-display transition-colors whitespace-nowrap">My Big Dream</span>
       </Link>
       
       {/* Desktop Navigation Links - Centered */}
-      <div className="hidden md:flex items-center gap-2">
+      <div className="hidden lg:flex items-center gap-2">
         {navLinks.map((item) => (
           <Link 
             key={item.name}
@@ -50,24 +50,25 @@ const Navbar = () => {
         ))}
       </div>
 
-      <div className="flex items-center gap-3 z-50">
+      <div className="flex items-center gap-2 md:gap-3 z-50">
         {/* Call to Action */}
-        <Link to="/book" className="btn-premium py-2 px-5 md:py-2.5 md:px-6 text-sm font-semibold shadow-pink-500/20">
-          Plan a Surprise
+        <Link to="/book" className="btn-premium py-2 px-4 md:py-2.5 md:px-6 text-xs md:text-sm font-semibold shadow-pink-500/20 whitespace-nowrap">
+          <span className="hidden sm:inline">Plan a Celebration</span>
+          <span className="sm:hidden">Book Now</span>
         </Link>
         
         {/* Mobile Menu Toggle */}
         <button 
-          className="md:hidden text-slate-800 p-2"
+          className="lg:hidden text-slate-800 p-1.5"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
-          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
       </div>
 
       {/* Mobile Navigation Dropdown */}
       {isMenuOpen && (
-        <div className="absolute top-[80px] left-0 right-0 bg-white border-b border-slate-100 shadow-xl p-6 flex flex-col gap-3 md:hidden rounded-b-3xl">
+        <div className="absolute top-[70px] md:top-[80px] left-0 right-0 bg-white border-b border-slate-100 shadow-xl p-6 flex flex-col gap-3 lg:hidden rounded-b-3xl">
           {navLinks.map((item) => (
             <Link 
               key={item.name}
