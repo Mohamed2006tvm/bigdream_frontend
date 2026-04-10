@@ -2,6 +2,9 @@ import React, { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import './App.css';
+import { LoadingProvider, useLoading } from './context/LoadingContext';
+import LoadingOverlay from './components/LoadingOverlay';
+import useWakeUpPing from './hooks/useWakeUpPing';
 
 // ─── Lazy-load all pages (code splitting) ────────────────────────────────────
 const Home = lazy(() => import('./pages/Home'));
@@ -54,11 +57,16 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
-function App() {
+const AppInner = () => {
+  const { isLoading, message } = useLoading();
+  useWakeUpPing();
+
   return (
     <Router>
       <ScrollToTop />
       <ShortcutHandler />
+      {/* Global loading overlay */}
+      {isLoading && <LoadingOverlay message={message} />}
       <div className="app-wrapper">
         <Suspense fallback={<PageLoader />}>
           <Routes>
@@ -86,6 +94,15 @@ function App() {
       </div>
     </Router>
   );
+};
+
+function App() {
+  return (
+    <LoadingProvider>
+      <AppInner />
+    </LoadingProvider>
+  );
 }
+
 
 export default App;
