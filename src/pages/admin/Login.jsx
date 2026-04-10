@@ -44,7 +44,7 @@ const Login = () => {
         onComplete: () => navigate('/admin/dashboard') 
       });
     } catch (err) {
-      const msg = err.response?.data?.message || 'Login failed. Please check your credentials.';
+      const msg = err.response?.data?.message || err.message || 'Login failed. Please check your credentials.';
       setError(msg);
     } finally {
       setLoading(false);

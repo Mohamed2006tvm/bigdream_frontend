@@ -41,9 +41,10 @@ api.interceptors.response.use(
       return Promise.reject(new Error('Request timed out. Please check your connection.'));
     }
 
-    // Network error (no response from server)
+    // Network error or security block (no response from server)
     if (!error.response) {
-      return Promise.reject(new Error('Unable to connect to server. Please try again.'));
+      // Check if it's likely a CSP or connection issue
+      return Promise.reject(new Error('Unable to connect to the server. This may be due to a security block or network issue. Please check your connection and try again.'));
     }
 
     return Promise.reject(error);
