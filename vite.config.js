@@ -23,11 +23,22 @@ export default defineConfig({
     rollupOptions: {
       output: {
         // Code splitting: split large vendor chunks for better caching
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-animation': ['gsap', 'framer-motion'],
-          'vendor-ui': ['lucide-react'],
-          'vendor-utils': ['axios', 'date-fns'],
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+              return 'vendor-react';
+            }
+            if (id.includes('gsap') || id.includes('framer-motion')) {
+              return 'vendor-animation';
+            }
+            if (id.includes('lucide-react')) {
+              return 'vendor-ui';
+            }
+            if (id.includes('axios') || id.includes('date-fns')) {
+              return 'vendor-utils';
+            }
+            return 'vendor';
+          }
         },
       },
     },
