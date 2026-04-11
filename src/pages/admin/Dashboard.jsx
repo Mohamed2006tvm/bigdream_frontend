@@ -4,7 +4,7 @@ import Navbar from '../../components/Navbar';
 import { 
   BarChart3, CalendarDays, Users, Clock, Edit2,
   Trash2, Filter, Loader2, LogOut, ChevronLeft, ChevronRight,
-  Hammer, RotateCcw, X, AlertCircle, Plus, CheckCircle2, Mail
+  Hammer, RotateCcw, X, AlertCircle, Plus, CheckCircle2, Mail, KeyRound, Eye, EyeOff
 } from 'lucide-react';
 import { format, addDays, isSameDay } from 'date-fns';
 import { formatTimeSlot } from '../../utils/formatters';
@@ -35,6 +35,12 @@ const Dashboard = () => {
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [availabilityConfig, setAvailabilityConfig] = useState({ mode: 'dynamic', days: 7, dates: [] });
   const [isAvailabilityOpen, setIsAvailabilityOpen] = useState(false);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [pwdForm, setPwdForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [pwdError, setPwdError] = useState('');
+  const [pwdSuccess, setPwdSuccess] = useState('');
+  const [pwdLoading, setPwdLoading] = useState(false);
+  const [pwdVisible, setPwdVisible] = useState({ current: false, newPwd: false, confirm: false });
 
   const [manualBooking, setManualBooking] = useState({
     screen_name: 'A',
@@ -210,14 +216,14 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    if (editingBooking || isManualModalOpen || isSettingsOpen || isAvailabilityOpen || selectedMessage) {
+    if (editingBooking || isManualModalOpen || isSettingsOpen || isAvailabilityOpen || selectedMessage || isPasswordModalOpen) {
       gsap.to(overlayRef.current, { opacity: 1, duration: 0.3 });
       gsap.fromTo(modalRef.current, 
         { scale: 0.9, opacity: 0, y: 20 },
         { scale: 1, opacity: 1, y: 0, duration: 0.4, ease: 'back.out(1.7)' }
       );
     }
-  }, [editingBooking, isManualModalOpen, isSettingsOpen, isAvailabilityOpen, selectedMessage]);
+  }, [editingBooking, isManualModalOpen, isSettingsOpen, isAvailabilityOpen, selectedMessage, isPasswordModalOpen]);
 
   const closeModal = (callback) => {
     gsap.to(modalRef.current, { 
@@ -231,6 +237,11 @@ const Dashboard = () => {
         setIsSettingsOpen(false);
         setIsAvailabilityOpen(false);
         setSelectedMessage(null);
+        setIsPasswordModalOpen(false);
+        setPwdForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        setPwdVisible({ current: false, newPwd: false, confirm: false });
+        setPwdError('');
+        setPwdSuccess('');
         setEditError('');
       } 
     });
@@ -303,6 +314,7 @@ const Dashboard = () => {
               setIsAvailabilityOpen(true);
               setIsSettingsOpen(false);
               setIsManualModalOpen(false);
+              setIsPasswordModalOpen(false);
               setSelectedMessage(null);
             }} className="btn-outline-premium group w-full xl:w-auto justify-start md:justify-center px-4 md:px-6">
               <CalendarDays className="text-brand-primary" size={18} /> 
@@ -312,6 +324,7 @@ const Dashboard = () => {
               setIsSettingsOpen(true);
               setIsAvailabilityOpen(false);
               setIsManualModalOpen(false);
+              setIsPasswordModalOpen(false);
               setSelectedMessage(null);
             }} className="btn-outline-premium group w-full xl:w-auto justify-start md:justify-center px-4 md:px-6">
               <Clock className="text-brand-primary group-hover:rotate-12 transition-transform" size={18} /> 
@@ -321,10 +334,29 @@ const Dashboard = () => {
               setIsManualModalOpen(true);
               setIsAvailabilityOpen(false);
               setIsSettingsOpen(false);
+              setIsPasswordModalOpen(false);
               setSelectedMessage(null);
             }} className="btn-premium group w-full xl:w-auto justify-start md:justify-center px-4 md:px-6">
               <Plus className="group-hover:rotate-90 transition-transform" size={18} /> 
               <span className="text-sm font-bold text-white">Manual Booking</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setIsPasswordModalOpen(true);
+                setIsAvailabilityOpen(false);
+                setIsSettingsOpen(false);
+                setIsManualModalOpen(false);
+                setSelectedMessage(null);
+                setEditingBooking(null);
+                setPwdVisible({ current: false, newPwd: false, confirm: false });
+                setPwdError('');
+                setPwdSuccess('');
+              }}
+              className="btn-outline-premium group w-full xl:w-auto justify-start md:justify-center px-4 md:px-6"
+            >
+              <KeyRound className="text-brand-primary" size={18} />
+              <span className="text-sm font-bold">Change password</span>
             </button>
             <button onClick={handleLogout} className="btn-outline-premium border-red-100 text-red-500 hover:bg-red-50 w-full xl:w-auto justify-start md:justify-center px-4 md:px-6">
               <LogOut size={18} /> 
@@ -454,6 +486,7 @@ const Dashboard = () => {
                                       setIsAvailabilityOpen(false);
                                       setIsSettingsOpen(false);
                                       setIsManualModalOpen(false);
+                                      setIsPasswordModalOpen(false);
                                       setSelectedMessage(null);
                                     }}
                                     className="p-2 rounded-lg bg-white border border-pink-100 shadow-sm hover:bg-brand-primary/5 hover:border-brand-primary/30 text-slate-400 hover:text-brand-primary transition-all"
@@ -520,6 +553,7 @@ const Dashboard = () => {
                                   setIsAvailabilityOpen(false);
                                   setIsSettingsOpen(false);
                                   setIsManualModalOpen(false);
+                                  setIsPasswordModalOpen(false);
                                   setSelectedMessage(null);
                                 }}
                                 className="w-full xs:w-auto flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-slate-50 text-slate-600 text-xs font-bold border border-slate-100 active:scale-95 transition-all"
@@ -594,6 +628,7 @@ const Dashboard = () => {
                             <div 
                               className="text-slate-600 text-sm font-medium line-clamp-2 cursor-pointer hover:text-brand-primary transition-colors"
                               onClick={() => {
+                                setIsPasswordModalOpen(false);
                                 setSelectedMessage(m);
                                 if (!m.is_read) {
                                   adminService.toggleInquiryRead(m.id, true).then(() => fetchMessages());
@@ -652,6 +687,7 @@ const Dashboard = () => {
                         <div 
                           className="p-4 rounded-2xl bg-white border border-pink-100/30 text-xs font-medium text-slate-600 line-clamp-3 leading-relaxed active:bg-slate-50 transition-colors"
                           onClick={() => {
+                            setIsPasswordModalOpen(false);
                             setSelectedMessage(m);
                             if (!m.is_read) {
                               adminService.toggleInquiryRead(m.id, true).then(() => fetchMessages());
@@ -695,7 +731,7 @@ const Dashboard = () => {
         </div>
 
         {/* Modals Overlay */}
-        {(editingBooking || isManualModalOpen || isSettingsOpen || isAvailabilityOpen || selectedMessage) && (
+        {(editingBooking || isManualModalOpen || isSettingsOpen || isAvailabilityOpen || selectedMessage || isPasswordModalOpen) && (
           <div 
             ref={overlayRef}
             className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-pink-900/40 backdrop-blur-md opacity-0"
@@ -803,6 +839,7 @@ const Dashboard = () => {
                                 setIsAvailabilityOpen(false);
                                 setIsSettingsOpen(false);
                                 setIsManualModalOpen(false);
+                                setIsPasswordModalOpen(false);
                                 setSelectedMessage(null);
                                 setEditingBooking({ ...editingBooking, time_slot: slot });
                               }}
@@ -1242,6 +1279,143 @@ const Dashboard = () => {
                         {editLoading ? <Loader2 className="animate-spin" size={20} /> : (
                           <span className="whitespace-nowrap">Save Availability Settings</span>
                         )}
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {isPasswordModalOpen && (
+                <>
+                  <div className="mb-10 pt-2">
+                    <div className="inline-block px-3 py-1 rounded bg-slate-100 text-slate-600 text-[10px] font-black tracking-widest uppercase mb-4 border border-slate-200">
+                      Security
+                    </div>
+                    <h3 className="text-2xl md:text-3xl mb-2 text-slate-900">Change password</h3>
+                    <p className="text-slate-500 font-medium text-xs md:text-sm">
+                      Use at least 8 characters, including one letter and one number.
+                    </p>
+                  </div>
+
+                  <div className="space-y-5">
+                    <div>
+                      <label className="text-xs font-black text-slate-500 uppercase tracking-widest block mb-2">
+                        Current password
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={pwdVisible.current ? 'text' : 'password'}
+                          autoComplete="current-password"
+                          className="premium-input w-full pr-12"
+                          value={pwdForm.currentPassword}
+                          onChange={(e) => setPwdForm({ ...pwdForm, currentPassword: e.target.value })}
+                        />
+                        <button
+                          type="button"
+                          tabIndex={-1}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-xl text-slate-400 hover:text-brand-primary hover:bg-brand-primary/5 transition-colors"
+                          aria-label={pwdVisible.current ? 'Hide password' : 'Show password'}
+                          onClick={() => setPwdVisible((v) => ({ ...v, current: !v.current }))}
+                        >
+                          {pwdVisible.current ? <EyeOff size={18} aria-hidden /> : <Eye size={18} aria-hidden />}
+                        </button>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-xs font-black text-slate-500 uppercase tracking-widest block mb-2">
+                        New password
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={pwdVisible.newPwd ? 'text' : 'password'}
+                          autoComplete="new-password"
+                          className="premium-input w-full pr-12"
+                          value={pwdForm.newPassword}
+                          onChange={(e) => setPwdForm({ ...pwdForm, newPassword: e.target.value })}
+                        />
+                        <button
+                          type="button"
+                          tabIndex={-1}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-xl text-slate-400 hover:text-brand-primary hover:bg-brand-primary/5 transition-colors"
+                          aria-label={pwdVisible.newPwd ? 'Hide password' : 'Show password'}
+                          onClick={() => setPwdVisible((v) => ({ ...v, newPwd: !v.newPwd }))}
+                        >
+                          {pwdVisible.newPwd ? <EyeOff size={18} aria-hidden /> : <Eye size={18} aria-hidden />}
+                        </button>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-xs font-black text-slate-500 uppercase tracking-widest block mb-2">
+                        Confirm new password
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={pwdVisible.confirm ? 'text' : 'password'}
+                          autoComplete="new-password"
+                          className="premium-input w-full pr-12"
+                          value={pwdForm.confirmPassword}
+                          onChange={(e) => setPwdForm({ ...pwdForm, confirmPassword: e.target.value })}
+                        />
+                        <button
+                          type="button"
+                          tabIndex={-1}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-xl text-slate-400 hover:text-brand-primary hover:bg-brand-primary/5 transition-colors"
+                          aria-label={pwdVisible.confirm ? 'Hide password' : 'Show password'}
+                          onClick={() => setPwdVisible((v) => ({ ...v, confirm: !v.confirm }))}
+                        >
+                          {pwdVisible.confirm ? <EyeOff size={18} aria-hidden /> : <Eye size={18} aria-hidden />}
+                        </button>
+                      </div>
+                    </div>
+
+                    {pwdError && (
+                      <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm">
+                        {pwdError}
+                      </div>
+                    )}
+                    {pwdSuccess && (
+                      <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm font-medium flex items-center gap-2">
+                        <CheckCircle2 size={18} />
+                        {pwdSuccess}
+                      </div>
+                    )}
+
+                    <div className="flex flex-col sm:flex-row gap-3 pt-4 pb-2">
+                      <button type="button" onClick={() => closeModal()} className="btn-outline-premium w-full sm:flex-1">
+                        Close
+                      </button>
+                      <button
+                        type="button"
+                        disabled={pwdLoading}
+                        onClick={async () => {
+                          setPwdLoading(true);
+                          setPwdError('');
+                          setPwdSuccess('');
+                          try {
+                            const { data } = await adminService.changePassword({
+                              currentPassword: pwdForm.currentPassword,
+                              newPassword: pwdForm.newPassword,
+                              confirmPassword: pwdForm.confirmPassword,
+                            });
+                            if (data.success) {
+                              setPwdForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+                              setPwdVisible({ current: false, newPwd: false, confirm: false });
+                              setPwdSuccess(data.message || 'Password updated successfully.');
+                            }
+                          } catch (err) {
+                            const res = err.response?.data;
+                            if (res?.errors?.length) {
+                              setPwdError(res.errors.map((e) => e.message).join('. '));
+                            } else {
+                              setPwdError(res?.message || err.message || 'Could not update password');
+                            }
+                          } finally {
+                            setPwdLoading(false);
+                          }
+                        }}
+                        className="btn-premium w-full sm:flex-[2] px-4 py-4"
+                      >
+                        {pwdLoading ? <Loader2 className="animate-spin" size={20} /> : 'Update password'}
                       </button>
                     </div>
                   </div>

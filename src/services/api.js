@@ -83,6 +83,7 @@ export const adminService = {
   toggleInquiryRead: (id, is_read) => api.patch(`/admin/messages/${id}/read`, { is_read }),
   getSetting: (key) => api.get(`/admin/settings/${encodeURIComponent(key)}`),
   updateSetting: (key, value) => api.patch(`/admin/settings/${encodeURIComponent(key)}`, { value }),
+  changePassword: (body) => api.patch('/admin/password', body),
 };
 
 export const settingService = {

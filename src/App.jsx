@@ -10,6 +10,7 @@ const Availability = lazy(() => import('./pages/Availability'));
 const Contact = lazy(() => import('./pages/Contact'));
 const Login = lazy(() => import('./pages/admin/Login'));
 const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 // ─── Page Loading Fallback ────────────────────────────────────────────────────
 const PageLoader = () => (
@@ -79,8 +80,7 @@ const AppInner = () => {
               }
             />
 
-            {/* Fallback */}
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
       </div>

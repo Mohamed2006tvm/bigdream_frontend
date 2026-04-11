@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, User, Loader2, AlertCircle, ShieldCheck } from 'lucide-react';
+import { Lock, User, Loader2, AlertCircle, ShieldCheck, Eye, EyeOff } from 'lucide-react';
 import Navbar from '../../components/Navbar';
 import api, { adminService } from '../../services/api';
 import gsap from 'gsap';
@@ -9,6 +9,7 @@ const Login = () => {
   const [credentials, setCredentials] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const navigate = useNavigate();
   
   const cardRef = useRef(null);
@@ -93,19 +94,28 @@ const Login = () => {
               
               <div className="relative group">
                 <Lock 
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-brand-primary transition-colors" 
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-brand-primary transition-colors pointer-events-none" 
                   size={18} 
                 />
                 <input
                   id="admin-password"
                   required
-                  type="password"
-                  className="premium-input pl-12"
+                  type={passwordVisible ? 'text' : 'password'}
+                  className="premium-input pl-12 pr-12"
                   placeholder="Password"
                   value={credentials.password}
                   onChange={e => setCredentials({...credentials, password: e.target.value})}
                   autoComplete="current-password"
                 />
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-xl text-slate-400 hover:text-brand-primary hover:bg-brand-primary/5 transition-colors"
+                  aria-label={passwordVisible ? 'Hide password' : 'Show password'}
+                  onClick={() => setPasswordVisible((v) => !v)}
+                >
+                  {passwordVisible ? <EyeOff size={18} aria-hidden /> : <Eye size={18} aria-hidden />}
+                </button>
               </div>
             </div>
 
