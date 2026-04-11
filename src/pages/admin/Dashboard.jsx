@@ -136,16 +136,16 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    if (!loading && bookings.length > 0 && contentRef.current) {
-      const ctx = gsap.context(() => {
-        gsap.fromTo(contentRef.current.children, 
-          { y: 20, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.6, stagger: 0.1, ease: 'power2.out' }
-        );
-      }, contentRef);
-      return () => ctx.revert();
-    }
-  }, [loading, bookings]);
+    if (loading || !contentRef.current) return;
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        contentRef.current.children,
+        { y: 16, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.5, stagger: 0.06, ease: 'power2.out' }
+      );
+    }, contentRef);
+    return () => ctx.revert();
+  }, [loading, view]);
 
   const fetchSlots = async () => {
     try {
@@ -178,6 +178,10 @@ const Dashboard = () => {
       const { data } = await adminService.getAllBookings(page, 20, search);
       setBookings(data.data.bookings);
       setTotal(data.data.total);
+    } catch (err) {
+      console.error('Failed to fetch bookings', err);
+      setBookings([]);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
@@ -288,11 +292,8 @@ const Dashboard = () => {
             <p className="text-slate-500 font-medium text-sm md:text-base">Welcome back, <span className="text-brand-primary font-bold">{JSON.parse(sessionStorage.getItem('admin'))?.username || 'Admin'}</span></p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:flex xl:flex-wrap gap-3 md:gap-4 w-full xl:w-auto">
-            <button 
-              onClick={() => {
-                setLoading(true);
-                setView(view === 'bookings' ? 'messages' : 'bookings');
-              }} 
+            <button
+              onClick={() => setView(view === 'bookings' ? 'messages' : 'bookings')}
               className="btn-outline-premium group w-full xl:w-auto justify-start md:justify-center px-4 md:px-6"
             >
               {view === 'bookings' ? <Mail className="text-brand-primary" size={18} /> : <CalendarDays className="text-brand-primary" size={18} />}
@@ -335,7 +336,7 @@ const Dashboard = () => {
         <div ref={contentRef}>
           {/* Stats Grid */}
           {loading && screens.length === 0 ? <StatsSkeleton /> : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 opacity-0">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
               {[
               { 
                 label: view === 'bookings' ? 'Total Bookings' : 'Total Messages', 
@@ -364,7 +365,7 @@ const Dashboard = () => {
 
           {view === 'bookings' ? (
           /* Booking Table */
-          <div className="glass-card-premium overflow-hidden border-white/5 opacity-0">
+          <div className="glass-card-premium overflow-hidden border-white/5">
             <div className="p-8 border-b border-white/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-white/[0.02]">
               <div className="flex flex-col gap-1">
                 <h3 className="text-xl flex items-center gap-3">
@@ -558,7 +559,7 @@ const Dashboard = () => {
           </div>
           ) : (
           /* Messages Table */
-          <div className="glass-card-premium overflow-hidden border-white/5 opacity-0">
+          <div className="glass-card-premium overflow-hidden border-white/5">
             <div className="p-8 border-b border-white/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-white/[0.02]">
               <div className="flex flex-col gap-1">
                 <h3 className="text-xl font-normal flex items-center gap-3">

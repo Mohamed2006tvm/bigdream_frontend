@@ -12,8 +12,8 @@ const api = axios.create({
   },
   // Send cookies with every cross-origin request (required for HttpOnly cookies)
   withCredentials: true,
-  // 30 second timeout — prevent hanging requests
-  timeout: 30000,
+  // Vercel + Neon cold starts can exceed 30s on first request; keep a generous default
+  timeout: Number(import.meta.env.VITE_API_TIMEOUT_MS) || 90000,
 });
 
 // ─── Request Interceptor — Attach JWT from sessionStorage (fallback) ─────────
@@ -41,9 +41,13 @@ api.interceptors.response.use(
       }
     }
 
-    // Request timed out
+    // Request timed out (axios) or aborted
     if (error.code === 'ECONNABORTED') {
-      return Promise.reject(new Error('Request timed out. Please check your connection.'));
+      return Promise.reject(
+        new Error(
+          'The server took too long to respond. If the API is on Vercel, the first request after idle can be slow — wait a moment and try again.'
+        )
+      );
     }
 
     // Network error or security block (no response from server)
@@ -63,7 +67,10 @@ export const bookingService = {
 };
 
 export const adminService = {
-  login: (credentials) => api.post('/auth/login', credentials),
+  login: (credentials) =>
+    api.post('/auth/login', credentials, {
+      timeout: Number(import.meta.env.VITE_LOGIN_TIMEOUT_MS) || 120000,
+    }),
   logout: () => api.post('/auth/logout'),
   getAllBookings: (page = 1, limit = 20, search = '') =>
     api.get(`/admin/bookings?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`),

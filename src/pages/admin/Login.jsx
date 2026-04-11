@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, User, Loader2, AlertCircle, ShieldCheck } from 'lucide-react';
 import Navbar from '../../components/Navbar';
-import { adminService } from '../../services/api';
+import api, { adminService } from '../../services/api';
 import gsap from 'gsap';
 
 const Login = () => {
@@ -19,6 +19,9 @@ const Login = () => {
       navigate('/admin/dashboard', { replace: true });
       return;
     }
+    // Wake Vercel serverless + edge path before the user submits (reduces cold-start timeouts on login)
+    api.get('/health', { timeout: 90000 }).catch(() => {});
+
     gsap.fromTo(cardRef.current, 
       { scale: 0.9, opacity: 0, y: 20 },
       { scale: 1, opacity: 1, y: 0, duration: 0.6, ease: 'back.out(1.7)' }
