@@ -23,7 +23,7 @@ const Contact = () => {
     setSubmitStatus(null);
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://bigdream-backend-production-2c10.up.railway.app/api';
       // Normalize URL (avoid double /api)
       const targetUrl = apiUrl.endsWith('/api') ? `${apiUrl}/contact` : `${apiUrl}/api/contact`;
       
