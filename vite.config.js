@@ -6,7 +6,7 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const proxyTarget =
-    env.VITE_PROXY_TARGET || 'https://bigdream-backend-production-2c10.up.railway.app'
+    env.VITE_PROXY_TARGET || 'https://bigdream-backend.vercel.app'
 
   return {
   plugins: [

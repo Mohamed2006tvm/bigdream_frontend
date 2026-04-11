@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const defaultProdApi =
-  import.meta.env.VITE_API_URL || 'https://bigdream-backend-production-2c10.up.railway.app/api';
+  import.meta.env.VITE_API_URL || 'https://bigdream-backend.vercel.app/api';
 
 const api = axios.create({
   baseURL: import.meta.env.DEV
