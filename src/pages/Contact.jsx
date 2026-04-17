@@ -154,21 +154,21 @@ const Contact = () => {
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-primary to-brand-secondary text-white flex items-center justify-center shadow-md shadow-pink-500/20 shrink-0">
                     <Phone size={18} strokeWidth={1.5} />
                   </div>
-                  <span className="text-sm font-medium text-slate-500">+91 XXXXX XXXXX</span>
+                  <span className="text-sm font-medium text-slate-500">+91 89391 67064</span>
                 </div>
                 
                 <div className="flex items-center gap-5">
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-primary to-brand-secondary text-white flex items-center justify-center shadow-md shadow-pink-500/20 shrink-0">
                     <Mail size={18} strokeWidth={1.5} />
                   </div>
-                  <span className="text-sm font-medium text-slate-500">plan@birthdaysurprise.com</span>
+                  <span className="text-sm font-medium text-slate-500">mydreamsurprise26@gmail.com</span>
                 </div>
                 
                 <div className="flex items-center gap-5">
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-primary to-brand-secondary text-white flex items-center justify-center shadow-md shadow-pink-500/20 shrink-0">
                     <MapPin size={18} strokeWidth={1.5} />
                   </div>
-                  <span className="text-sm font-medium text-slate-500">Your Hidden Venue</span>
+                  <span className="text-sm font-medium text-slate-500">Chennai</span>
                 </div>
               </div>
             </div>
@@ -177,8 +177,8 @@ const Contact = () => {
             <div className="bg-white p-10 md:p-10 rounded-[32px] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.08)] text-left">
               <h2 className="text-xl font-normal text-slate-800 font-display mb-4">Planning Hours</h2>
               <div className="space-y-2">
-                <p className="text-sm font-medium text-slate-500">Mon – Sat: 9:00 AM – 9:00 PM</p>
-                <p className="text-sm font-medium text-slate-500">Sun: 10:00 AM – 6:00 PM</p>
+                <p className="text-sm font-medium text-slate-500">Mon – Sat: 9:00 AM – 12:00 AM</p>
+                <p className="text-sm font-medium text-slate-500">Sun: 09:00 AM – 12:00 AM</p>
                 <p className="text-xs font-bold text-brand-primary mt-4 uppercase tracking-wider">Celebrations available 24/7</p>
               </div>
             </div>

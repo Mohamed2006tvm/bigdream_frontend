@@ -26,9 +26,10 @@ const Footer = () => {
           <div>
             <h4 className="font-normal text-slate-800 text-xl font-display mb-6">Contact</h4>
             <div className="flex flex-col gap-3">
-              <span className="text-slate-500 text-sm font-medium">+91 XXXXX XXXXX</span>
-              <span className="text-slate-500 text-sm font-medium">info@eventhall.com</span>
-              <span className="text-slate-500 text-sm font-medium">Your City</span>
+              <span className="text-slate-500 text-sm font-medium">+91 89391 67064</span>
+              <span className="text-slate-500 text-sm font-medium">mydreamsurprise26@gmail.com
+</span>
+              <span className="text-slate-500 text-sm font-medium">Chennai</span>
             </div>
           </div>
         </div>
