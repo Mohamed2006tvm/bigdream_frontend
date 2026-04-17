@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { 
   Monitor, 
   Clock, 
@@ -38,110 +38,11 @@ const Screen3_4 = "/assests/Screens/Screen3.4.jpeg";
 
 const Home = () => {
   const [activeFaq, setActiveFaq] = useState(null);
-  const [showEntryPopup, setShowEntryPopup] = useState(false);
-  const [popupSlideIndex, setPopupSlideIndex] = useState(0);
-  const popupSlides = [Screen1_1, Screen2_1, Screen3_1, Screen1_3, Screen2_3, Screen3_3];
-
-  useEffect(() => {
-    const popupSeen = sessionStorage.getItem('home_entry_popup_seen');
-    if (popupSeen === '1') return;
-
-    const timer = setTimeout(() => {
-      setShowEntryPopup(true);
-      sessionStorage.setItem('home_entry_popup_seen', '1');
-    }, 800);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    if (!showEntryPopup) return undefined;
-    const timer = setInterval(() => {
-      setPopupSlideIndex((prev) => (prev + 1) % popupSlides.length);
-    }, 2200);
-
-    return () => clearInterval(timer);
-  }, [showEntryPopup, popupSlides.length]);
 
 
   return (
     <div className="min-h-screen bg-bg-main font-sans">
       <Navbar />
-      <AnimatePresence>
-        {showEntryPopup && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[70] bg-slate-900/45 backdrop-blur-sm px-5 flex items-center justify-center"
-            onClick={() => setShowEntryPopup(false)}
-          >
-            <motion.div
-              initial={{ opacity: 0, y: 16, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 10, scale: 0.98 }}
-              transition={{ duration: 0.25 }}
-              className="w-full max-w-md bg-white rounded-[30px] p-5 sm:p-6 shadow-2xl border border-pink-100"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="mb-5">
-                <div className="relative h-36 sm:h-44 rounded-2xl overflow-hidden border border-pink-100 shadow-sm">
-                  <AnimatePresence mode="wait">
-                    <motion.img
-                      key={popupSlideIndex}
-                      src={popupSlides[popupSlideIndex]}
-                      alt={`Celebration preview ${popupSlideIndex + 1}`}
-                      className="absolute inset-0 w-full h-full object-cover"
-                      initial={{ opacity: 0, scale: 1.03 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.4 }}
-                    />
-                  </AnimatePresence>
-                </div>
-                <div className="flex justify-center gap-1.5 mt-3">
-                  {popupSlides.map((_, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      aria-label={`Go to slide ${idx + 1}`}
-                      onClick={() => setPopupSlideIndex(idx)}
-                      className={`h-1.5 rounded-full transition-all ${
-                        idx === popupSlideIndex ? 'w-6 bg-brand-primary' : 'w-2 bg-slate-300 hover:bg-slate-400'
-                      }`}
-                    />
-                  ))}
-                </div>
-              </div>
-              <div className="inline-flex px-3 py-1 rounded-full bg-brand-primary/10 text-brand-primary text-[10px] font-black tracking-widest uppercase mb-4">
-                Special Offer
-              </div>
-              <h3 className="text-3xl font-normal text-slate-900 tracking-tight mb-3">
-                Plan your celebration now
-              </h3>
-              <p className="text-slate-500 font-medium text-sm leading-relaxed mb-7">
-                Reserve your preferred slot early and get the best theme and timing for your event.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowEntryPopup(false)}
-                  className="btn-outline-premium w-full sm:flex-1"
-                >
-                  Maybe later
-                </button>
-                <Link
-                  to="/book"
-                  onClick={() => setShowEntryPopup(false)}
-                  className="btn-premium w-full sm:flex-[2] flex items-center justify-center gap-2"
-                >
-                  Book now <ArrowRight size={16} />
-                </Link>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
       
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-32 overflow-hidden bg-bg-main">
@@ -357,7 +258,7 @@ const Home = () => {
       {/* Why Choose */}
       <section className="py-24 container mx-auto px-6" id="about">
         <div className="text-center mb-20">
-          <h2 className="text-4xl md:text-5xl font-normal text-slate-900 tracking-tight">Why Choose <span className="text-gradient-premium">My Big Dream</span></h2>
+          <h2 className="text-4xl md:text-5xl font-normal text-slate-900 tracking-tight">Why Choose <span className="text-gradient-premium">My dream surprise</span></h2>
         </div>
         <div className="grid md:grid-cols-3 gap-8">
           {[
@@ -387,7 +288,7 @@ const Home = () => {
             {[
               { name: 'Magic Forest', img: Screen1_1, desc: 'Immersive nature theme with fairy lights and fog effects', features: ['Bio-luminescent Decor', 'Surround Sound', 'Hidden Entrance'] },
               { name: 'Royal Palace', img: Screen2_1, desc: 'Elegant theme with grand chandeliers and red carpet', features: ['Luxury Catering', 'Throne Chair', 'Professional Photography'] },
-              { name: 'Space Quest', img: Screen3_1, desc: 'Neon cosmic theme with dry ice and laser lights', features: ['Laser Show', 'Futuristic Music', 'Intergalactic Decor'] }
+              { name: 'Milky Moon', img: Screen3_1, desc: 'Neon cosmic theme with dry ice and laser lights', features: ['Laser Show', 'Futuristic Music', 'Intergalactic Decor'] }
             ].map((screen, i) => (
               <div key={i} className="bg-white overflow-hidden rounded-[32px] hover:-translate-y-2 transition-transform duration-300 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.08)] group">
                 <div className="h-48 overflow-hidden relative">

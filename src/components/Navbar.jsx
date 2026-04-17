@@ -30,7 +30,7 @@ const Navbar = () => {
   return (
     <nav ref={navRef} className="sticky top-0 z-50 h-[70px] md:h-[80px] flex items-center justify-between px-4 md:px-8 bg-white/80 backdrop-blur-md border-b border-slate-100/50">
       <Link to="/" className="flex items-center gap-2 group z-50 shrink-0">
-        <span className="text-2xl md:text-3xl font-normal text-brand-primary font-display transition-colors whitespace-nowrap">My Big Dream</span>
+        <span className="text-2xl md:text-3xl font-normal text-brand-primary font-display transition-colors whitespace-nowrap">My dream surprise</span>
       </Link>
       
       {/* Desktop Navigation Links - Centered */}

@@ -176,7 +176,7 @@ const Availability = () => {
                     <h3 className="text-xl font-normal font-display">
                       {screen.screen_name === 'A' ? 'Magic Forest' :
                         screen.screen_name === 'B' ? 'Royal Palace' :
-                          screen.screen_name === 'C' ? 'Space Quest' :
+                          screen.screen_name === 'C' ? 'Milky Moon' :
                             `Screen ${screen.screen_name}`}
                     </h3>
                   </div>
@@ -222,15 +222,13 @@ const Availability = () => {
                     );
                   })}
 
-                  {screen.screen_name === 'B' && (
-                    <button
-                      onClick={() => setSelectedSlot({ screenId: screen.screen_id, screenName: screen.screen_name, timeSlot: '', isCustom: true })}
-                      className="w-full mt-4 py-4 rounded-xl border-2 border-dashed border-pink-100 text-slate-400 font-bold text-sm flex items-center justify-center gap-2 hover:border-brand-primary/50 hover:text-brand-primary transition-all bg-slate-50/50 group"
-                    >
-                      <Plus size={18} className="group-hover:rotate-90 transition-transform text-brand-primary" />
-                      Request Custom Time
-                    </button>
-                  )}
+                  <button
+                    onClick={() => setSelectedSlot({ screenId: screen.screen_id, screenName: screen.screen_name, timeSlot: '', isCustom: true })}
+                    className="w-full mt-4 py-4 rounded-xl border-2 border-dashed border-pink-100 text-slate-400 font-bold text-sm flex items-center justify-center gap-2 hover:border-brand-primary/50 hover:text-brand-primary transition-all bg-slate-50/50 group"
+                  >
+                    <Plus size={18} className="group-hover:rotate-90 transition-transform text-brand-primary" />
+                    Request Custom Time
+                  </button>
                 </div>
 
                 <div className="mt-8 pt-6 border-t border-white/5">
@@ -268,7 +266,7 @@ const Availability = () => {
                 <p className="text-slate-500 flex items-center gap-2 font-medium">
                   {selectedSlot.screenName === 'A' ? 'Magic Forest' :
                     selectedSlot.screenName === 'B' ? 'Royal Palace' :
-                      selectedSlot.screenName === 'C' ? 'Space Quest' :
+                      selectedSlot.screenName === 'C' ? 'Milky Moon' :
                         `Screen ${selectedSlot.screenName}`} <ChevronRight size={14} />
                   <span className="text-brand-primary font-bold">
                     {selectedSlot.isCustom ? 'Custom Window' : formatTimeSlot(selectedSlot.timeSlot)}
