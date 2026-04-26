@@ -139,8 +139,8 @@ const Availability = () => {
                   key={ds}
                   onClick={() => setSelectedDate(ds)}
                   className={`flex-none min-w-[120px] p-4 rounded-2xl border transition-all duration-300 ${isActive
-                      ? 'bg-brand-primary border-brand-primary text-white shadow-lg shadow-pink-500/30'
-                      : 'bg-white border-pink-100/50 text-slate-500 hover:bg-pink-50'
+                    ? 'bg-brand-primary border-brand-primary text-white shadow-lg shadow-pink-500/30'
+                    : 'bg-white border-pink-100/50 text-slate-500 hover:bg-pink-50'
                     }`}
                 >
                   <div className="text-xs uppercase tracking-widest opacity-60 mb-1">{format(d, 'EEE')}</div>
@@ -174,16 +174,16 @@ const Availability = () => {
                       <Users size={20} />
                     </div>
                     <h3 className="text-xl font-normal font-display">
-                      {screen.screen_name === 'A' ? 'Magic Forest' :
-                        screen.screen_name === 'B' ? 'Royal Palace' :
-                          screen.screen_name === 'C' ? 'Milky Moon' :
+                      {screen.screen_name === 'A' ? 'Space 1' :
+                        screen.screen_name === 'B' ? 'Space 2' :
+                          screen.screen_name === 'C' ? 'Space 3' :
                             `Screen ${screen.screen_name}`}
                     </h3>
                   </div>
                   <span className="text-xs font-bold px-2 py-1 rounded bg-pink-50 border border-pink-100 text-brand-primary/70">
                     4K HDR
                   </span>
-                </div>               
+                </div>
                 <div className="space-y-3 flex-grow">
                   {screen.time_slots.map((slot) => {
                     const booking = screen.slots.find(s => s.time_slot === slot);
@@ -201,8 +201,8 @@ const Availability = () => {
                         disabled={isOccupied}
                         onClick={() => setSelectedSlot({ screenId: screen.screen_id, screenName: screen.screen_name, timeSlot: slot, isCustom: false })}
                         className={`w-full group px-4 py-4 rounded-xl border flex items-center justify-between transition-all ${isOccupied
-                            ? 'bg-slate-50 border-slate-100 opacity-60 grayscale cursor-not-allowed'
-                            : 'bg-white border-pink-100/50 hover:border-brand-primary/50 hover:bg-pink-50/50 hover:shadow-sm'
+                          ? 'bg-slate-50 border-slate-100 opacity-60 grayscale cursor-not-allowed'
+                          : 'bg-white border-pink-100/50 hover:border-brand-primary/50 hover:bg-pink-50/50 hover:shadow-sm'
                           }`}
                       >
                         <div className="flex items-center gap-3">
@@ -221,14 +221,6 @@ const Availability = () => {
                       </button>
                     );
                   })}
-
-                  <button
-                    onClick={() => setSelectedSlot({ screenId: screen.screen_id, screenName: screen.screen_name, timeSlot: '', isCustom: true })}
-                    className="w-full mt-4 py-4 rounded-xl border-2 border-dashed border-pink-100 text-slate-400 font-bold text-sm flex items-center justify-center gap-2 hover:border-brand-primary/50 hover:text-brand-primary transition-all bg-slate-50/50 group"
-                  >
-                    <Plus size={18} className="group-hover:rotate-90 transition-transform text-brand-primary" />
-                    Request Custom Time
-                  </button>
                 </div>
 
                 <div className="mt-8 pt-6 border-t border-white/5">
